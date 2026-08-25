@@ -37,6 +37,16 @@
   text-align: center;
 }
 
+.admin-login__url {
+  margin: -0.75rem 0 1.25rem !important;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: rgba(91, 140, 255, 0.12);
+  border: 1px solid rgba(91, 140, 255, 0.25);
+  color: var(--color-ink) !important;
+  font-size: 0.85rem !important;
+}
+
 .admin-login__back {
   display: block;
   margin-top: 1rem;
@@ -49,6 +59,10 @@
   display: grid;
   grid-template-columns: 260px 1fr;
   min-height: 100vh;
+}
+
+.admin-layout[hidden] {
+  display: none !important;
 }
 
 .admin-sidebar {

@@ -133,15 +133,28 @@ const saveProductFromForm = (event) => {
 };
 
 const showAdminView = () => {
-  document.getElementById("login-view").hidden = true;
-  document.getElementById("admin-view").hidden = false;
-  renderProductsTable();
-  fillCompanyForm();
+  const loginView = document.getElementById("login-view");
+  const adminView = document.getElementById("admin-view");
+
+  loginView.hidden = true;
+  loginView.style.display = "none";
+  adminView.hidden = false;
+  adminView.style.display = "";
+
+  if (catalog) {
+    renderProductsTable();
+    fillCompanyForm();
+  }
 };
 
 const showLoginView = () => {
-  document.getElementById("login-view").hidden = false;
-  document.getElementById("admin-view").hidden = true;
+  const loginView = document.getElementById("login-view");
+  const adminView = document.getElementById("admin-view");
+
+  loginView.hidden = false;
+  loginView.style.display = "";
+  adminView.hidden = true;
+  adminView.style.display = "none";
 };
 
 const setupLoginForm = () => {
