@@ -4,12 +4,14 @@ import {
   saveCatalog,
   downloadCatalog,
   publishToGitHub,
+  compressImageFile,
 } from "./catalog-store.js";
 
 const TOKEN_KEY = "tnj3d_github_token";
 let catalog = null;
 let editingProductId = null;
 let appReady = false;
+let uploadedImageData = null;
 
 const formatPrice = (value) => {
   if (value === null || value === undefined) return "Sob consulta";
@@ -76,13 +78,29 @@ const fillCompanyForm = () => {
   document.getElementById("company-name").value = catalog.company.name;
   document.getElementById("company-tagline").value = catalog.company.tagline || "";
   document.getElementById("company-whatsapp").value = catalog.company.whatsapp;
+  document.getElementById("company-whatsapp2").value = catalog.company.whatsapp2 || "";
   document.getElementById("company-email").value = catalog.company.email;
   document.getElementById("company-message").value = catalog.company.whatsappMessage || "";
   document.getElementById("default-category").value = catalog.defaultCategory || "";
 };
 
+const resetImagePreview = () => {
+  uploadedImageData = null;
+  document.getElementById("product-image-file").value = "";
+  document.getElementById("product-image-preview").hidden = true;
+  document.getElementById("product-image-preview-img").removeAttribute("src");
+};
+
+const showImagePreview = (src) => {
+  const preview = document.getElementById("product-image-preview");
+  const image = document.getElementById("product-image-preview-img");
+  image.src = src;
+  preview.hidden = false;
+};
+
 const openProductModal = (product = null) => {
   editingProductId = product?.id || null;
+  resetImagePreview();
   document.getElementById("product-form-title").textContent = product
     ? "Editar produto"
     : "Novo produto";
@@ -94,10 +112,19 @@ const openProductModal = (product = null) => {
   document.getElementById("product-price").value =
     product?.price != null ? product.price : "";
   document.getElementById("product-badge").value = product?.badge || "";
-  document.getElementById("product-image").value = product?.image || "";
+  document.getElementById("product-image").value =
+    product?.image && !product.image.startsWith("data:image/") ? product.image : "";
   document.getElementById("product-featured").checked = Boolean(product?.featured);
   document.getElementById("product-description").value = product?.description || "";
   document.getElementById("product-benefit").value = product?.benefit || "";
+
+  if (product?.image) {
+    showImagePreview(product.image);
+    if (product.image.startsWith("data:image/")) {
+      uploadedImageData = product.image;
+    }
+  }
+
   document.getElementById("admin-product-modal").showModal();
 };
 
@@ -112,7 +139,10 @@ const saveProductFromForm = (event) => {
     category: document.getElementById("product-category").value.trim(),
     price: priceRaw ? Number(priceRaw) : null,
     badge: document.getElementById("product-badge").value.trim() || undefined,
-    image: document.getElementById("product-image").value.trim() || null,
+    image:
+      uploadedImageData ||
+      document.getElementById("product-image").value.trim() ||
+      null,
     featured: document.getElementById("product-featured").checked,
     description: document.getElementById("product-description").value.trim(),
     benefit: document.getElementById("product-benefit").value.trim() || undefined,
@@ -211,6 +241,23 @@ const setupAdminEvents = () => {
 
   document.getElementById("new-product-btn").addEventListener("click", () => openProductModal());
   document.getElementById("product-form").addEventListener("submit", saveProductFromForm);
+  document.getElementById("product-image-file").addEventListener("change", async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      uploadedImageData = await compressImageFile(file);
+      showImagePreview(uploadedImageData);
+      document.getElementById("product-image").value = "";
+    } catch (error) {
+      resetImagePreview();
+      showAlert(error.message, "error");
+    }
+  });
+  document.getElementById("remove-image-btn").addEventListener("click", () => {
+    resetImagePreview();
+    document.getElementById("product-image").value = "";
+  });
   document.getElementById("cancel-product-btn").addEventListener("click", () => {
     document.getElementById("admin-product-modal").close();
   });
@@ -243,6 +290,7 @@ const setupAdminEvents = () => {
       name: document.getElementById("company-name").value.trim(),
       tagline: document.getElementById("company-tagline").value.trim(),
       whatsapp: document.getElementById("company-whatsapp").value.trim(),
+      whatsapp2: document.getElementById("company-whatsapp2").value.trim() || undefined,
       email: document.getElementById("company-email").value.trim(),
       whatsappMessage: document.getElementById("company-message").value.trim(),
     };

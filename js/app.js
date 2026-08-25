@@ -18,9 +18,9 @@ const formatPrice = (value) => {
   }).format(value);
 };
 
-const buildWhatsAppLink = (message) => {
+const buildWhatsAppLink = (message, phone = company.whatsapp) => {
   const text = encodeURIComponent(message);
-  return `https://wa.me/${company.whatsapp}?text=${text}`;
+  return `https://wa.me/${phone}?text=${text}`;
 };
 
 const getCategories = () =>
@@ -223,8 +223,17 @@ const setupHero = () => {
 };
 
 const setupContactLinks = () => {
-  const whatsappUrl = buildWhatsAppLink(company.whatsappMessage);
-  document.getElementById("whatsapp-main").href = whatsappUrl;
+  const message = company.whatsappMessage;
+  document.getElementById("whatsapp-main").href = buildWhatsAppLink(message, company.whatsapp);
+
+  const secondary = document.getElementById("whatsapp-secondary");
+  if (company.whatsapp2) {
+    secondary.href = buildWhatsAppLink(message, company.whatsapp2);
+    secondary.hidden = false;
+  } else {
+    secondary.hidden = true;
+  }
+
   document.getElementById("header-cta").href = "#contato";
   document.getElementById("email-main").href = `mailto:${company.email}`;
 };

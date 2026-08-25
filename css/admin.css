@@ -287,6 +287,32 @@
   font-size: 0.9rem;
 }
 
+.admin-form__upload input[type="file"] {
+  padding: 0.55rem;
+  background: var(--color-surface-2);
+  border: 1px dashed var(--color-line);
+  cursor: pointer;
+}
+
+.admin-form__hint-inline {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+
+.product-image-preview {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+}
+
+.product-image-preview img {
+  width: min(100%, 220px);
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line);
+}
+
 .admin-form__hint a {
   color: var(--color-accent);
 }

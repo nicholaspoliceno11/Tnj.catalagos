@@ -94,7 +94,8 @@
           <h2>Dados da empresa</h2>
           <label>Nome<input type="text" id="company-name" required /></label>
           <label>Tagline<input type="text" id="company-tagline" /></label>
-          <label>WhatsApp (com DDI)<input type="text" id="company-whatsapp" required /></label>
+          <label>WhatsApp 1 (com DDI)<input type="text" id="company-whatsapp" required placeholder="5582993091722" /></label>
+          <label>WhatsApp 2 (com DDI)<input type="text" id="company-whatsapp2" placeholder="5582988180771" /></label>
           <label>E-mail<input type="email" id="company-email" required /></label>
           <label class="admin-form__full">Mensagem padrão WhatsApp<textarea id="company-message" rows="3"></textarea></label>
           <label>Categoria padrão<input type="text" id="default-category" /></label>
@@ -133,7 +134,16 @@
         <label>Categoria<input type="text" id="product-category" required /></label>
         <label>Preço (R$)<input type="number" id="product-price" min="0" step="0.01" placeholder="Deixe vazio para 'Sob consulta'" /></label>
         <label>Badge<input type="text" id="product-badge" placeholder="Ex.: Destaque, Novo" /></label>
-        <label>URL da imagem<input type="text" id="product-image" placeholder="assets/produtos/nome.png" /></label>
+        <label class="admin-form__full admin-form__upload">
+          Foto do produto
+          <input type="file" id="product-image-file" accept="image/png,image/jpeg,image/webp,image/gif" />
+          <span class="admin-form__hint-inline">PNG, JPG ou WEBP — até 5 MB</span>
+        </label>
+        <div class="admin-form__full product-image-preview" id="product-image-preview" hidden>
+          <img id="product-image-preview-img" alt="Pré-visualização da foto" />
+          <button type="button" class="btn btn--ghost btn--sm" id="remove-image-btn">Remover foto</button>
+        </div>
+        <label class="admin-form__full">Ou URL da imagem<input type="text" id="product-image" placeholder="assets/produtos/nome.png" /></label>
         <label class="admin-form__checkbox">
           <input type="checkbox" id="product-featured" />
           Destaque no catálogo
