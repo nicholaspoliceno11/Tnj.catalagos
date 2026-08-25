@@ -4,9 +4,18 @@ Dashboard de catálogo digital para apresentar itens à venda da empresa. Layout
 
 ## Link público
 
-Após publicar no GitHub Pages, o catálogo ficará disponível em:
+**URL correta** (nome do repositório é `Tnj.catalagos`):
 
-`https://nicholaspoliceno11.github.io/Tnj.catalagos/`
+**https://nicholaspoliceno11.github.io/Tnj.catalagos/**
+
+> ⚠️ Não use `Tnj.catalogos` — esse endereço não existe e retorna 404.
+
+### Publicar (primeira vez)
+
+1. Abra [Settings → Pages](https://github.com/nicholaspoliceno11/Tnj.catalagos/settings/pages)
+2. Em **Source**, selecione **GitHub Actions**
+3. Aguarde o workflow **Deploy GitHub Pages** concluir em [Actions](https://github.com/nicholaspoliceno11/Tnj.catalagos/actions)
+4. Acesse o link acima (pode levar 1–2 minutos após o deploy)
 
 ## Como personalizar
 
