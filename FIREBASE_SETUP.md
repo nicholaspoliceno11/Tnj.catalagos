@@ -1,134 +1,109 @@
-# Firebase — domínio tnj3d.impressoes
+# Firebase — publicar catálogo TNJ 3D
 
-Guia para publicar o catálogo TNJ 3D no **Firebase Hosting** com domínio personalizado.
+Guia para publicar o catálogo no **Firebase Hosting**.
 
-## Resultado final
+## URLs
 
-| Item | Exemplo |
-|------|---------|
-| URL Firebase (temporária) | `https://tnj3d.web.app` |
-| Domínio personalizado | `https://tnj3d.impressoes.com.br` *(ou o domínio que você registrar)* |
+| Item | Endereço |
+|------|----------|
+| Firebase (após deploy) | **https://tnj-3d-catalogo.web.app** |
+| GitHub Pages (atual) | https://nicholaspoliceno11.github.io/Tnj.catalagos/ |
 
-> **Importante:** `tnj3d.impressoes` sozinho não é um domínio válido na internet. Você precisa de um domínio registrado (ex.: `impressoes.com.br`) e criar o subdomínio `tnj3d`.
-
----
-
-## Passo 1 — Criar projeto no Firebase
-
-1. Acesse [console.firebase.google.com](https://console.firebase.google.com)
-2. Clique em **Adicionar projeto**
-3. Nome sugerido: **TNJ 3D Catálogo**
-4. Desative o Google Analytics (opcional, para simplificar)
-5. Clique em **Criar projeto**
-
-Anote o **ID do projeto** (ex.: `tnj3d-catalogo`).
+> O erro **"Site Not Found"** em `tnj-3d-catalogo.web.app` significa que o site **ainda não foi publicado**. Siga os passos abaixo.
 
 ---
 
-## Passo 2 — Ativar Hosting
+## Passo 1 — Ativar Hosting no Firebase Console
 
-1. No menu lateral: **Hosting** → **Começar**
-2. Clique em **Avançar** (não precisa instalar SDK no site estático)
+1. Acesse [Firebase Console → Hosting](https://console.firebase.google.com/project/tnj-3d-catalogo/hosting)
+2. Clique em **Começar** (se ainda não ativou)
+3. Clique em **Avançar** — não precisa adicionar app Web nem instalar SDK
 
 ---
 
-## Passo 3 — Configurar o repositório
+## Passo 2 — Gerar o token (Cloud Shell ou terminal)
 
-No seu computador (ou peça ajuda para fazer no GitHub):
+### ⚠️ Comando correto
+
+O pacote npm se chama **`firebase-tools`**, não `firebase`. Use um destes:
 
 ```bash
-# 1. Copie o ID do projeto
-cp .firebaserc.example .firebaserc
-# Edite .firebaserc e troque SEU-PROJECT-ID-AQUI pelo ID real
+# Opção A — direto (recomendado no Cloud Shell)
+npx firebase-tools login:ci
 
-# 2. Instale dependências
+# Opção B — instalar globalmente primeiro
+npm install -g firebase-tools
+firebase login:ci
+
+# Opção C — dentro do repositório clonado
+git clone https://github.com/nicholaspoliceno11/Tnj.catalagos.git
+cd Tnj.catalagos
 npm install
-
-# 3. Faça login no Firebase
-npx firebase login
-
-# 4. Publique o site
-npm run deploy
+npm run login:ci
 ```
 
-O site ficará em: `https://SEU-PROJECT-ID.web.app`
+> **Não use** `npx firebase login:ci` — isso gera o erro `could not determine executable to run`.
+
+O comando abre o navegador para login. Ao final, copie o **token** exibido no terminal (começa com algo como `1//...`).
 
 ---
 
-## Passo 4 — Deploy automático pelo GitHub (recomendado)
+## Passo 3 — Adicionar secret no GitHub
 
-1. Gere um token CI do Firebase:
-   ```bash
-   npx firebase login:ci
-   ```
-   Copie o token gerado.
+1. Abra [Settings → Secrets → Actions](https://github.com/nicholaspoliceno11/Tnj.catalagos/settings/secrets/actions)
+2. Clique em **New repository secret**
+3. Nome: `FIREBASE_TOKEN`
+4. Valor: cole o token copiado acima
+5. Salve
 
-2. No GitHub, vá em **Settings → Secrets → Actions** do repositório `Tnj.catalagos`
-
-3. Crie o secret: `FIREBASE_TOKEN` = token copiado acima
-
-4. Edite `.firebaserc` no repositório com o ID real do projeto e faça push na `main`
-
-5. O workflow `.github/workflows/firebase-hosting.yml` publica automaticamente
+> Só precisa de **um** secret: `FIREBASE_TOKEN`. O ID do projeto já está configurado no workflow.
 
 ---
 
-## Passo 5 — Domínio personalizado `tnj3d.impressoes`
+## Passo 4 — Disparar o deploy
 
-### Se você já tem um domínio (ex.: impressoes.com.br)
+Qualquer push na branch `main` dispara o deploy automaticamente.
 
+Para forçar manualmente:
+1. Abra [Actions → Deploy Firebase Hosting](https://github.com/nicholaspoliceno11/Tnj.catalagos/actions/workflows/firebase-hosting.yml)
+2. Clique em **Run workflow** → **Run workflow**
+
+Aguarde 1–2 minutos e acesse: **https://tnj-3d-catalogo.web.app**
+
+---
+
+## Alternativa — Deploy direto pelo Cloud Shell
+
+Se preferir publicar sem GitHub Actions:
+
+```bash
+git clone https://github.com/nicholaspoliceno11/Tnj.catalagos.git
+cd Tnj.catalagos
+npm install
+npx firebase-tools login
+npx firebase-tools deploy --only hosting --project tnj-3d-catalogo
+```
+
+---
+
+## Domínio personalizado (opcional)
+
+`tnj3d.impressoes` sozinho não é domínio válido. Você precisa registrar um domínio, por exemplo:
+
+- `tnj3d.impressoes.com.br`
+- `tnj3d.com.br`
+
+Depois do primeiro deploy:
 1. Firebase Console → **Hosting** → **Adicionar domínio personalizado**
-2. Digite: `tnj3d.impressoes.com.br`
-3. O Firebase mostrará registros DNS para adicionar no seu provedor (Registro.br, Hostinger, etc.):
-
-   | Tipo | Nome | Valor |
-   |------|------|-------|
-   | TXT | tnj3d | (verificação do Firebase) |
-   | A | tnj3d | 151.101.1.195 |
-   | A | tnj3d | 151.101.65.195 |
-
-4. Aguarde propagação DNS (15 min a 48 h)
-5. O Firebase ativa SSL (HTTPS) automaticamente
-
-### Se ainda não tem domínio
-
-Registre um domínio como:
-- `impressoes.com.br` → subdomínio `tnj3d.impressoes.com.br`
-- `tnj3d.com.br` → domínio direto `tnj3d.com.br`
-
-Sugestão de registradores no Brasil: Registro.br, Hostinger, GoDaddy.
+2. Configure os registros DNS indicados pelo Firebase
+3. Aguarde propagação (15 min a 48 h)
 
 ---
 
-## Passo 6 — Apontar o domínio (DNS)
+## Resumo dos erros comuns
 
-No painel do seu domínio, crie:
-
-```
-tnj3d.impressoes.com.br  →  registros A do Firebase (passo 5)
-```
-
-Ou, se preferir CNAME (alguns provedores):
-
-```
-tnj3d  CNAME  SEU-PROJECT-ID.web.app
-```
-
----
-
-## Comparativo: GitHub Pages vs Firebase
-
-| | GitHub Pages | Firebase Hosting |
-|--|--------------|------------------|
-| URL atual | `nicholaspoliceno11.github.io/Tnj.catalagos` | `tnj3d.web.app` |
-| Domínio próprio | Possível | **Mais fácil** |
-| SSL grátis | Sim | Sim |
-| Admin publicar fotos | Precisa token GitHub | Pode usar Firebase Storage depois |
-
-Você pode manter os dois ativos durante a transição.
-
----
-
-## Próximo passo (opcional)
-
-Integrar **Firestore** para o painel admin salvar produtos direto na nuvem, sem token GitHub. Me avise se quiser que eu configure isso.
+| Erro | Causa | Solução |
+|------|-------|---------|
+| `could not determine executable to run` | Comando `npx firebase` errado | Use `npx firebase-tools login:ci` |
+| Site Not Found em `.web.app` | Nenhum deploy feito ainda | Gere token + adicione `FIREBASE_TOKEN` no GitHub |
+| Deploy falha no GitHub Actions | Secret ausente ou inválido | Recrie o token com `login:ci` e atualize o secret |
