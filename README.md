@@ -4,13 +4,25 @@ Dashboard de catálogo digital para apresentar itens à venda da empresa. Layout
 
 ## Link público
 
-**URL correta** (nome do repositório é `Tnj.catalagos`):
+**GitHub Pages** (atual):
 
 **https://nicholaspoliceno11.github.io/Tnj.catalagos/**
 
-> ⚠️ Não use `Tnj.catalogos` — esse endereço não existe e retorna 404.
+> ⚠️ Use **catalagos** (com **a**), não `catalogos`.
 
-### Publicar (primeira vez)
+### Firebase Hosting + domínio `tnj3d.impressoes`
+
+Para publicar com domínio próprio (ex.: `tnj3d.impressoes.com.br`), siga o guia:
+
+👉 **[FIREBASE_SETUP.md](./FIREBASE_SETUP.md)**
+
+Resumo:
+1. Criar projeto em [Firebase Console](https://console.firebase.google.com)
+2. Copiar `.firebaserc.example` → `.firebaserc` (já vem com `tnj-3d-catalogo`)
+3. Adicionar secret `FIREBASE_TOKEN` no GitHub
+4. Configurar domínio personalizado no Firebase Hosting
+
+### Publicar no GitHub Pages (primeira vez)
 
 1. Abra [Settings → Pages](https://github.com/nicholaspoliceno11/Tnj.catalagos/settings/pages)
 2. Em **Source**, selecione **GitHub Actions**

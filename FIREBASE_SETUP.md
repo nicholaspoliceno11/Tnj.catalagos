@@ -6,22 +6,22 @@ Guia para publicar o catálogo TNJ 3D no **Firebase Hosting** com domínio perso
 
 | Item | Exemplo |
 |------|---------|
-| URL Firebase (temporária) | `https://tnj3d.web.app` |
+| URL Firebase (temporária) | `https://tnj-3d-catalogo.web.app` |
 | Domínio personalizado | `https://tnj3d.impressoes.com.br` *(ou o domínio que você registrar)* |
 
 > **Importante:** `tnj3d.impressoes` sozinho não é um domínio válido na internet. Você precisa de um domínio registrado (ex.: `impressoes.com.br`) e criar o subdomínio `tnj3d`.
 
 ---
 
-## Passo 1 — Criar projeto no Firebase
+## Passo 1 — Criar projeto no Firebase ✅
 
-1. Acesse [console.firebase.google.com](https://console.firebase.google.com)
-2. Clique em **Adicionar projeto**
-3. Nome sugerido: **TNJ 3D Catálogo**
-4. Desative o Google Analytics (opcional, para simplificar)
-5. Clique em **Criar projeto**
+Projeto criado:
 
-Anote o **ID do projeto** (ex.: `tnj3d-catalogo`).
+| Campo | Valor |
+|-------|-------|
+| Nome | TNJ 3D Catalogo |
+| **ID do projeto** | `tnj-3d-catalogo` |
+| Número | 573100404754 |
 
 ---
 
@@ -29,29 +29,30 @@ Anote o **ID do projeto** (ex.: `tnj3d-catalogo`).
 
 1. No menu lateral: **Hosting** → **Começar**
 2. Clique em **Avançar** (não precisa instalar SDK no site estático)
+3. Pule a etapa de adicionar app Web por enquanto — o catálogo é site estático (HTML/CSS/JS)
+
+> A seção **"Seus aplicativos"** pode ficar vazia. Isso é normal para Hosting sem Firestore/Auth.
 
 ---
 
-## Passo 3 — Configurar o repositório
+## Passo 3 — Configurar o repositório ✅
 
-No seu computador (ou peça ajuda para fazer no GitHub):
+O repositório já está configurado com o ID `tnj-3d-catalogo`.
+
+Para publicar manualmente no seu computador:
 
 ```bash
-# 1. Copie o ID do projeto
-cp .firebaserc.example .firebaserc
-# Edite .firebaserc e troque SEU-PROJECT-ID-AQUI pelo ID real
-
-# 2. Instale dependências
+# 1. Instale dependências
 npm install
 
-# 3. Faça login no Firebase
+# 2. Faça login no Firebase
 npx firebase login
 
-# 4. Publique o site
+# 3. Publique o site
 npm run deploy
 ```
 
-O site ficará em: `https://SEU-PROJECT-ID.web.app`
+O site ficará em: **https://tnj-3d-catalogo.web.app**
 
 ---
 
@@ -67,9 +68,7 @@ O site ficará em: `https://SEU-PROJECT-ID.web.app`
 
 3. Crie o secret: `FIREBASE_TOKEN` = token copiado acima
 
-4. Edite `.firebaserc` no repositório com o ID real do projeto e faça push na `main`
-
-5. O workflow `.github/workflows/firebase-hosting.yml` publica automaticamente
+4. Faça push na `main` — o workflow `.github/workflows/firebase-hosting.yml` publica automaticamente
 
 ---
 
