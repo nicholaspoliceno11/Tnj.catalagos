@@ -65,6 +65,7 @@ const categoryFilters = document.querySelector("#categoryFilters");
 const emptyState = document.querySelector("#emptyState");
 const searchInput = document.querySelector("#searchInput");
 const totalProducts = document.querySelector("[data-total-products]");
+const totalCategories = document.querySelector("[data-total-categories]");
 
 function normalize(value) {
   return value
@@ -148,16 +149,24 @@ function setMissingImageFallbacks() {
   const logo = document.querySelector("[data-fallback-logo]");
   const infographic = document.querySelector("[data-fallback-infographic]");
 
+  const markAsMissing = (image, parentSelector) => {
+    image.closest(parentSelector).classList.add("is-missing");
+  };
+
   if (logo) {
-    logo.addEventListener("error", () => {
-      logo.closest(".logo-shell").classList.add("is-missing");
-    });
+    logo.addEventListener("error", () => markAsMissing(logo, ".logo-shell"));
+
+    if (logo.complete && logo.naturalWidth === 0) {
+      markAsMissing(logo, ".logo-shell");
+    }
   }
 
   if (infographic) {
-    infographic.addEventListener("error", () => {
-      infographic.closest(".infographic-card").classList.add("is-missing");
-    });
+    infographic.addEventListener("error", () => markAsMissing(infographic, ".infographic-card"));
+
+    if (infographic.complete && infographic.naturalWidth === 0) {
+      markAsMissing(infographic, ".infographic-card");
+    }
   }
 }
 
@@ -181,7 +190,10 @@ function bindEvents() {
 }
 
 function init() {
+  const categoryCount = new Set(products.map((product) => product.category)).size;
+
   totalProducts.textContent = products.length;
+  totalCategories.textContent = categoryCount;
   setMissingImageFallbacks();
   renderFilters();
   renderProducts();
