@@ -1,16 +1,18 @@
-import { company, products } from "./products.js";
+import { company, products, defaultCategory } from "./products.js";
 
 const state = {
   search: "",
-  category: "all",
+  category: defaultCategory,
   sort: "featured",
 };
 
-const formatPrice = (value) =>
-  new Intl.NumberFormat("pt-BR", {
+const formatPrice = (value) => {
+  if (value === null || value === undefined) return "Sob consulta";
+  return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
   }).format(value);
+};
 
 const buildWhatsAppLink = (message) => {
   const text = encodeURIComponent(message);
@@ -34,8 +36,10 @@ const filterProducts = () => {
     list = list.filter((product) => {
       const haystack = [
         product.name,
+        product.subtitle,
         product.code,
         product.description,
+        product.benefit,
         product.category,
       ]
         .join(" ")
@@ -69,9 +73,14 @@ const productImageFallback = (name) => {
   return `https://placehold.co/640x480/181c27/5cff8a?text=${label}`;
 };
 
+const buildQuoteMessage = (product) => {
+  const priceText = product.price != null ? ` — ${formatPrice(product.price)}` : "";
+  return `Olá! Tenho interesse no produto *${product.name}* (${product.code})${priceText}. Poderia me enviar um orçamento?`;
+};
+
 const renderProductCard = (product) => {
   const imageSrc = product.image || productImageFallback(product.name);
-  const quoteMessage = `Olá! Tenho interesse no produto *${product.name}* (${product.code}) — ${formatPrice(product.price)}. Poderia me enviar um orçamento?`;
+  const quoteMessage = buildQuoteMessage(product);
 
   return `
     <article class="product-card" data-id="${product.id}">
@@ -82,6 +91,7 @@ const renderProductCard = (product) => {
       <div class="product-card__body">
         <span class="product-card__category">${product.category}</span>
         <h3 class="product-card__title">${product.name}</h3>
+        ${product.subtitle ? `<p class="product-card__subtitle">${product.subtitle}</p>` : ""}
         <p class="product-card__description">${product.description}</p>
         <div class="product-card__footer">
           <div>
@@ -106,7 +116,9 @@ const renderProducts = () => {
   const filtered = filterProducts();
 
   const hasFilters =
-    state.search.trim() !== "" || state.category !== "all" || state.sort !== "featured";
+    state.search.trim() !== "" ||
+    state.category !== defaultCategory ||
+    state.sort !== "featured";
 
   clearBtn.hidden = !hasFilters;
   count.textContent = `${filtered.length} produto${filtered.length === 1 ? "" : "s"} encontrado${filtered.length === 1 ? "" : "s"}`;
@@ -128,7 +140,7 @@ const openModal = (productId) => {
   const modal = document.getElementById("product-modal");
   const body = document.getElementById("modal-body");
   const imageSrc = product.image || productImageFallback(product.name);
-  const quoteMessage = `Olá! Tenho interesse no produto *${product.name}* (${product.code}) — ${formatPrice(product.price)}. Poderia me enviar um orçamento?`;
+  const quoteMessage = buildQuoteMessage(product);
 
   body.innerHTML = `
     <div class="modal__image">
@@ -137,11 +149,20 @@ const openModal = (productId) => {
     <div class="modal__details">
       <span class="eyebrow">${product.category}</span>
       <h3>${product.name}</h3>
+      ${product.subtitle ? `<p class="modal__subtitle">${product.subtitle}</p>` : ""}
       <div class="modal__meta">
         <span class="tag">${product.code}</span>
         ${product.badge ? `<span class="tag">${product.badge}</span>` : ""}
       </div>
       <p>${product.description}</p>
+      ${
+        product.benefit
+          ? `<div class="modal__benefit">
+              <h4>Para que serve?</h4>
+              <p>${product.benefit}</p>
+            </div>`
+          : ""
+      }
       <p class="product-card__price">${formatPrice(product.price)}</p>
       <a class="btn btn--whatsapp" href="${buildWhatsAppLink(quoteMessage)}" target="_blank" rel="noopener noreferrer">Solicitar orçamento</a>
     </div>
@@ -158,12 +179,13 @@ const setupCategoryFilters = () => {
   select.innerHTML = `<option value="all">Todas</option>${categories
     .map((category) => `<option value="${category}">${category}</option>`)
     .join("")}`;
+  select.value = state.category;
 
   pills.innerHTML = [
-    `<button class="pill is-active" data-category="all" type="button">Todas</button>`,
+    `<button class="pill${state.category === "all" ? " is-active" : ""}" data-category="all" type="button">Todas</button>`,
     ...categories.map(
       (category) =>
-        `<button class="pill" data-category="${category}" type="button">${category}</button>`
+        `<button class="pill${state.category === category ? " is-active" : ""}" data-category="${category}" type="button">${category}</button>`
     ),
   ].join("");
 
@@ -243,13 +265,13 @@ const setupEvents = () => {
 
   document.getElementById("clear-filters").addEventListener("click", () => {
     state.search = "";
-    state.category = "all";
+    state.category = defaultCategory;
     state.sort = "featured";
     document.getElementById("search-input").value = "";
-    document.getElementById("category-filter").value = "all";
+    document.getElementById("category-filter").value = defaultCategory;
     document.getElementById("sort-filter").value = "featured";
     document.querySelectorAll("#category-pills .pill").forEach((pill) => {
-      pill.classList.toggle("is-active", pill.dataset.category === "all");
+      pill.classList.toggle("is-active", pill.dataset.category === defaultCategory);
     });
     renderProducts();
   });

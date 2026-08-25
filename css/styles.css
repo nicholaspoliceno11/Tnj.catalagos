@@ -540,9 +540,17 @@ select {
 }
 
 .product-card__title {
-  margin: 0.35rem 0 0.5rem;
+  margin: 0.35rem 0 0.35rem;
   font-size: 1.08rem;
   line-height: 1.3;
+}
+
+.product-card__subtitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-blue);
+  line-height: 1.35;
 }
 
 .product-card__description {
@@ -762,9 +770,39 @@ select {
 }
 
 .modal__details h3 {
-  margin: 0.25rem 0 0.75rem;
+  margin: 0.25rem 0 0.5rem;
   font-family: var(--font-display);
   font-size: 1.6rem;
+}
+
+.modal__subtitle {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-blue);
+}
+
+.modal__benefit {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-line);
+}
+
+.modal__benefit h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+}
+
+.modal__benefit p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
 }
 
 .modal__meta {
