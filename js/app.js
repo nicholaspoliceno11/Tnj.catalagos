@@ -46,6 +46,7 @@ const filterProducts = () => {
         product.description,
         product.benefit,
         product.category,
+        ...(product.audienceTags || []),
       ]
         .join(" ")
         .toLowerCase();
@@ -83,6 +84,40 @@ const buildQuoteMessage = (product) => {
   return `Olá! Tenho interesse no produto *${product.name}* (${product.code})${priceText}. Poderia me enviar um orçamento?`;
 };
 
+const AUDIENCE_TAG_LABELS = {
+  TDAH: "TDAH",
+  TEA: "TEA",
+  ANSIEDADE: "Ansiedade",
+};
+
+const renderAudienceTags = (tags = []) => {
+  if (!tags.length) return "";
+
+  const chips = tags
+    .map(
+      (tag) =>
+        `<span class="product-tag product-tag--${tag.toLowerCase()}">${AUDIENCE_TAG_LABELS[tag] || tag}</span>`
+    )
+    .join("");
+
+  return `
+    <div class="product-card__tags">
+      <span class="product-card__tags-label">Bom para:</span>
+      <div class="product-card__tags-list">${chips}</div>
+    </div>
+  `;
+};
+
+const renderOfferBadge = (product) => {
+  if (!product.offerType) return "";
+
+  const label =
+    product.offerLabel ||
+    (product.offerType === "kit" ? "Kit" : "Promoção");
+
+  return `<span class="product-card__offer product-card__offer--${product.offerType}">${label}</span>`;
+};
+
 const renderProductCard = (product) => {
   const imageSrc = product.image || productImageFallback(product.name);
   const quoteMessage = buildQuoteMessage(product);
@@ -91,6 +126,7 @@ const renderProductCard = (product) => {
     <article class="product-card" data-id="${product.id}">
       <div class="product-card__media">
         ${product.badge ? `<span class="product-card__badge">${product.badge}</span>` : ""}
+        ${renderOfferBadge(product)}
         <img src="${imageSrc}" alt="${product.name}" loading="lazy" onerror="this.src='${productImageFallback(product.name)}'" />
       </div>
       <div class="product-card__body">
@@ -98,6 +134,7 @@ const renderProductCard = (product) => {
         <h3 class="product-card__title">${product.name}</h3>
         ${product.subtitle ? `<p class="product-card__subtitle">${product.subtitle}</p>` : ""}
         <p class="product-card__description">${product.description}</p>
+        ${renderAudienceTags(product.audienceTags)}
         <div class="product-card__footer">
           <div>
             <span class="product-card__price">${formatPrice(product.price)}</span>
@@ -158,7 +195,27 @@ const openModal = (productId) => {
       <div class="modal__meta">
         <span class="tag">${product.code}</span>
         ${product.badge ? `<span class="tag">${product.badge}</span>` : ""}
+        ${
+          product.offerType
+            ? `<span class="tag tag--${product.offerType}">${product.offerLabel || (product.offerType === "kit" ? "Kit" : "Promoção")}</span>`
+            : ""
+        }
       </div>
+      ${
+        product.audienceTags?.length
+          ? `<div class="modal__audience-tags">
+              <span class="product-card__tags-label">Bom para:</span>
+              <div class="product-card__tags-list">
+                ${product.audienceTags
+                  .map(
+                    (tag) =>
+                      `<span class="product-tag product-tag--${tag.toLowerCase()}">${AUDIENCE_TAG_LABELS[tag] || tag}</span>`
+                  )
+                  .join("")}
+              </div>
+            </div>`
+          : ""
+      }
       <p>${product.description}</p>
       ${
         product.benefit

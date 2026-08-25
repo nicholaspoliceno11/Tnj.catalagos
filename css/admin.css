@@ -317,6 +317,89 @@
   color: var(--color-accent);
 }
 
+.admin-tag-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.admin-tag-group__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.admin-tag-group__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-muted);
+}
+
+.admin-tag-group__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-tag-option {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.admin-tag-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.admin-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 2px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-tag-option input:checked + .admin-tag-chip {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.admin-tag-chip--tdah {
+  background: rgba(92, 255, 138, 0.1);
+  color: #5cff8a;
+  border-color: rgba(92, 255, 138, 0.3);
+}
+
+.admin-tag-option input:checked + .admin-tag-chip--tdah {
+  background: rgba(92, 255, 138, 0.22);
+  border-color: #5cff8a;
+}
+
+.admin-tag-chip--tea {
+  background: rgba(92, 168, 255, 0.1);
+  color: #5ca8ff;
+  border-color: rgba(92, 168, 255, 0.3);
+}
+
+.admin-tag-option input:checked + .admin-tag-chip--tea {
+  background: rgba(92, 168, 255, 0.22);
+  border-color: #5ca8ff;
+}
+
+.admin-tag-chip--ansiedade {
+  background: rgba(180, 120, 255, 0.1);
+  color: #c49bff;
+  border-color: rgba(180, 120, 255, 0.3);
+}
+
+.admin-tag-option input:checked + .admin-tag-chip--ansiedade {
+  background: rgba(180, 120, 255, 0.22);
+  border-color: #c49bff;
+}
+
 .admin-modal {
   width: min(94vw, 760px);
 }

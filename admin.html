@@ -178,6 +178,39 @@
           <input type="checkbox" id="product-featured" />
           Destaque no catálogo
         </label>
+
+        <div class="admin-form__full admin-tag-group">
+          <span class="admin-tag-group__label">Este item é bom para</span>
+          <p class="admin-tag-group__hint">Selecione as condições em que o produto ajuda. As tags aparecem em destaque no catálogo.</p>
+          <div class="admin-tag-group__options" id="audience-tags">
+            <label class="admin-tag-option">
+              <input type="checkbox" name="audience-tag" value="TDAH" />
+              <span class="admin-tag-chip admin-tag-chip--tdah">TDAH</span>
+            </label>
+            <label class="admin-tag-option">
+              <input type="checkbox" name="audience-tag" value="TEA" />
+              <span class="admin-tag-chip admin-tag-chip--tea">TEA</span>
+            </label>
+            <label class="admin-tag-option">
+              <input type="checkbox" name="audience-tag" value="ANSIEDADE" />
+              <span class="admin-tag-chip admin-tag-chip--ansiedade">Ansiedade</span>
+            </label>
+          </div>
+        </div>
+
+        <label>
+          Tipo de oferta
+          <select id="product-offer-type">
+            <option value="">Nenhum</option>
+            <option value="promocao">Promoção</option>
+            <option value="kit">Kit</option>
+          </select>
+        </label>
+        <label id="product-offer-label-wrap" hidden>
+          Rótulo da oferta
+          <input type="text" id="product-offer-label" placeholder="Ex.: Kit Calma, 20% OFF" />
+        </label>
+
         <label class="admin-form__full">Descrição curta<textarea id="product-description" rows="2" required></textarea></label>
         <label class="admin-form__full">Para que serve?<textarea id="product-benefit" rows="5"></textarea></label>
         <div class="admin-form__full admin-form__actions">
