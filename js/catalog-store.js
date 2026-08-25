@@ -113,7 +113,20 @@ const publishImages = async (catalog, token) => {
     updatedProducts.push({ ...product, image: filePath });
   }
 
-  return { ...catalog, products: updatedProducts };
+  let hero = catalog.hero || {};
+  if (hero.image && isDataImage(hero.image)) {
+    const extension = getImageExtension(hero.image);
+    const heroPath = `assets/hero-destaque.${extension}`;
+    await uploadGitHubFile(
+      token,
+      heroPath,
+      dataUrlToBase64(hero.image),
+      "feat: atualizar foto em destaque da página inicial"
+    );
+    hero = { ...hero, image: heroPath };
+  }
+
+  return { ...catalog, hero, products: updatedProducts };
 };
 
 export const publishToGitHub = async (catalog, token) => {

@@ -47,6 +47,7 @@
       </div>
       <nav class="admin-nav">
         <button type="button" class="admin-nav__item is-active" data-panel="products">Produtos</button>
+        <button type="button" class="admin-nav__item" data-panel="hero">Página inicial</button>
         <button type="button" class="admin-nav__item" data-panel="settings">Configurações</button>
       </nav>
       <div class="admin-sidebar__footer">
@@ -87,6 +88,35 @@
             <tbody id="products-table"></tbody>
           </table>
         </div>
+      </section>
+
+      <section id="hero-panel" class="admin-panel" hidden>
+        <form id="hero-form" class="admin-form admin-form--grid">
+          <h2>Seção principal (topo do site)</h2>
+          <label class="admin-form__full">Texto superior<input type="text" id="hero-eyebrow" /></label>
+          <label class="admin-form__full">Título principal<input type="text" id="hero-title" required /></label>
+          <label class="admin-form__full">Descrição<textarea id="hero-description" rows="3" required></textarea></label>
+          <label>Botão principal<input type="text" id="hero-cta-primary" /></label>
+          <label>Botão secundário<input type="text" id="hero-cta-secondary" /></label>
+
+          <label class="admin-form__full admin-form__upload">
+            Foto em destaque (lado direito)
+            <input type="file" id="hero-image-file" accept="image/png,image/jpeg,image/webp,image/gif" />
+            <span class="admin-form__hint-inline">PNG, JPG ou WEBP — até 5 MB</span>
+          </label>
+          <div class="admin-form__full product-image-preview" id="hero-image-preview" hidden>
+            <img id="hero-image-preview-img" alt="Pré-visualização da foto em destaque" />
+            <button type="button" class="btn btn--ghost btn--sm" id="hero-remove-image-btn">Remover foto</button>
+          </div>
+          <label class="admin-form__full">Ou URL da foto<input type="text" id="hero-image-url" placeholder="assets/logo.png" /></label>
+
+          <label>Rótulo do card<input type="text" id="hero-featured-label" placeholder="Destaque" /></label>
+          <label>Produto em destaque<select id="hero-featured-product"></select></label>
+
+          <div class="admin-form__full">
+            <button type="submit" class="btn btn--primary">Salvar página inicial</button>
+          </div>
+        </form>
       </section>
 
       <section id="settings-panel" class="admin-panel" hidden>

@@ -8,6 +8,16 @@
     "whatsappMessage": "Olá! Gostaria de solicitar um orçamento pelo catálogo TNJ 3D."
   },
   "defaultCategory": "Brinquedos Sensoriais",
+  "hero": {
+    "eyebrow": "Brinquedos sensoriais em impressão 3D",
+    "title": "Ferramentas de foco, calma e bem-estar",
+    "description": "Catálogo TNJ 3D com brinquedos sensoriais para relaxamento, concentração e autorregulação. Explore cada item, veja os benefícios e solicite orçamento.",
+    "ctaPrimary": "Ver brinquedos sensoriais",
+    "ctaSecondary": "Solicitar orçamento",
+    "image": "assets/logo.png",
+    "featuredProductId": "bs-001",
+    "featuredLabel": "Destaque"
+  },
   "products": [
     {
       "id": "bs-001",

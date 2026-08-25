@@ -12,6 +12,7 @@ let catalog = null;
 let editingProductId = null;
 let appReady = false;
 let uploadedImageData = null;
+let heroUploadedImageData = null;
 
 const formatPrice = (value) => {
   if (value === null || value === undefined) return "Sob consulta";
@@ -82,6 +83,57 @@ const fillCompanyForm = () => {
   document.getElementById("company-email").value = catalog.company.email;
   document.getElementById("company-message").value = catalog.company.whatsappMessage || "";
   document.getElementById("default-category").value = catalog.defaultCategory || "";
+};
+
+const populateFeaturedProductSelect = () => {
+  const select = document.getElementById("hero-featured-product");
+  if (!select || !catalog) return;
+
+  select.innerHTML = catalog.products
+    .map(
+      (product) =>
+        `<option value="${product.id}">${product.name} (${product.code})</option>`
+    )
+    .join("");
+};
+
+const resetHeroImagePreview = () => {
+  heroUploadedImageData = null;
+  document.getElementById("hero-image-file").value = "";
+  document.getElementById("hero-image-preview").hidden = true;
+  document.getElementById("hero-image-preview-img").removeAttribute("src");
+};
+
+const showHeroImagePreview = (src) => {
+  const preview = document.getElementById("hero-image-preview");
+  const image = document.getElementById("hero-image-preview-img");
+  image.src = src;
+  preview.hidden = false;
+};
+
+const fillHeroForm = () => {
+  if (!catalog) return;
+  const hero = catalog.hero || {};
+
+  populateFeaturedProductSelect();
+  document.getElementById("hero-eyebrow").value = hero.eyebrow || "";
+  document.getElementById("hero-title").value = hero.title || "";
+  document.getElementById("hero-description").value = hero.description || "";
+  document.getElementById("hero-cta-primary").value = hero.ctaPrimary || "";
+  document.getElementById("hero-cta-secondary").value = hero.ctaSecondary || "";
+  document.getElementById("hero-image-url").value =
+    hero.image && !hero.image.startsWith("data:image/") ? hero.image : "";
+  document.getElementById("hero-featured-label").value = hero.featuredLabel || "Destaque";
+  document.getElementById("hero-featured-product").value =
+    hero.featuredProductId || catalog.products[0]?.id || "";
+
+  resetHeroImagePreview();
+  if (hero.image) {
+    showHeroImagePreview(hero.image);
+    if (hero.image.startsWith("data:image/")) {
+      heroUploadedImageData = hero.image;
+    }
+  }
 };
 
 const resetImagePreview = () => {
@@ -158,6 +210,7 @@ const saveProductFromForm = (event) => {
 
   saveCatalog(catalog);
   renderProductsTable();
+  populateFeaturedProductSelect();
   document.getElementById("admin-product-modal").close();
   showAlert("Produto salvo localmente. Clique em Publicar catálogo para atualizar o site.");
 };
@@ -174,6 +227,7 @@ const showAdminView = () => {
   if (catalog) {
     renderProductsTable();
     fillCompanyForm();
+    fillHeroForm();
   }
 };
 
@@ -229,13 +283,22 @@ const setupAdminEvents = () => {
       });
       const panel = button.dataset.panel;
       document.getElementById("products-panel").hidden = panel !== "products";
+      document.getElementById("hero-panel").hidden = panel !== "hero";
       document.getElementById("settings-panel").hidden = panel !== "settings";
-      document.getElementById("panel-title").textContent =
-        panel === "products" ? "Produtos" : "Configurações";
-      document.getElementById("panel-subtitle").textContent =
-        panel === "products"
-          ? "Edite preços, descrições e adicione novos itens."
-          : "Dados da empresa e publicação no GitHub.";
+
+      const titles = {
+        products: "Produtos",
+        hero: "Página inicial",
+        settings: "Configurações",
+      };
+      const subtitles = {
+        products: "Edite preços, descrições e adicione novos itens.",
+        hero: "Altere textos, foto em destaque e produto do card.",
+        settings: "Dados da empresa e publicação no GitHub.",
+      };
+
+      document.getElementById("panel-title").textContent = titles[panel] || "Admin";
+      document.getElementById("panel-subtitle").textContent = subtitles[panel] || "";
     });
   });
 
@@ -297,6 +360,44 @@ const setupAdminEvents = () => {
     catalog.defaultCategory = document.getElementById("default-category").value.trim();
     saveCatalog(catalog);
     showAlert("Configurações salvas localmente.");
+  });
+
+  document.getElementById("hero-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    catalog.hero = {
+      eyebrow: document.getElementById("hero-eyebrow").value.trim(),
+      title: document.getElementById("hero-title").value.trim(),
+      description: document.getElementById("hero-description").value.trim(),
+      ctaPrimary: document.getElementById("hero-cta-primary").value.trim(),
+      ctaSecondary: document.getElementById("hero-cta-secondary").value.trim(),
+      image:
+        heroUploadedImageData ||
+        document.getElementById("hero-image-url").value.trim() ||
+        "assets/logo.png",
+      featuredProductId: document.getElementById("hero-featured-product").value,
+      featuredLabel: document.getElementById("hero-featured-label").value.trim() || "Destaque",
+    };
+    saveCatalog(catalog);
+    showAlert("Página inicial salva. Clique em Publicar catálogo para atualizar o site.");
+  });
+
+  document.getElementById("hero-image-file").addEventListener("change", async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      heroUploadedImageData = await compressImageFile(file);
+      showHeroImagePreview(heroUploadedImageData);
+      document.getElementById("hero-image-url").value = "";
+    } catch (error) {
+      resetHeroImagePreview();
+      showAlert(error.message, "error");
+    }
+  });
+
+  document.getElementById("hero-remove-image-btn").addEventListener("click", () => {
+    resetHeroImagePreview();
+    document.getElementById("hero-image-url").value = "";
   });
 
   document.getElementById("save-token-btn").addEventListener("click", () => {

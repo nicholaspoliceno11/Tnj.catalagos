@@ -2,6 +2,7 @@ import { loadCatalog } from "./catalog-store.js";
 
 let company = {};
 let products = [];
+let hero = {};
 let defaultCategory = "Brinquedos Sensoriais";
 
 const state = {
@@ -210,16 +211,32 @@ const setupCategoryFilters = () => {
 
 const setupHero = () => {
   const stats = document.getElementById("hero-stats");
-  const featured = products.find((product) => product.featured) || products[0];
+  const featuredProduct =
+    products.find((product) => product.id === hero.featuredProductId) ||
+    products.find((product) => product.featured) ||
+    products[0];
+
+  document.getElementById("hero-eyebrow").textContent = hero.eyebrow || "";
+  document.getElementById("hero-title").textContent = hero.title || "";
+  document.getElementById("hero-description").textContent = hero.description || "";
+  document.getElementById("hero-cta-primary").textContent = hero.ctaPrimary || "Ver catálogo";
+  document.getElementById("hero-cta-secondary").textContent = hero.ctaSecondary || "Solicitar orçamento";
+
+  const heroImage = document.getElementById("hero-image");
+  if (hero.image) {
+    heroImage.src = hero.image;
+    heroImage.alt = hero.title || "TNJ 3D";
+  }
+
+  document.getElementById("featured-label").textContent = hero.featuredLabel || "Destaque";
+  document.getElementById("featured-name").textContent = featuredProduct?.name || "—";
+  document.getElementById("featured-price").textContent = formatPrice(featuredProduct?.price);
 
   stats.innerHTML = `
     <div><dt>Produtos</dt><dd>${products.length}</dd></div>
     <div><dt>Categorias</dt><dd>${getCategories().length}</dd></div>
     <div><dt>Atendimento</dt><dd>WhatsApp</dd></div>
   `;
-
-  document.getElementById("featured-name").textContent = featured?.name || "—";
-  document.getElementById("featured-price").textContent = formatPrice(featured?.price);
 };
 
 const setupContactLinks = () => {
@@ -305,6 +322,7 @@ const init = async () => {
     const catalog = await loadCatalog();
     company = catalog.company;
     products = catalog.products;
+    hero = catalog.hero || {};
     defaultCategory = catalog.defaultCategory || "Brinquedos Sensoriais";
     state.category = defaultCategory;
   } catch (error) {
