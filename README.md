@@ -70,8 +70,12 @@ Abra `http://localhost:8080`.
 ```
 ├── index.html          # Página principal
 ├── css/styles.css      # Estilos
+├── data/catalog.json   # Dados do catálogo (produtos e empresa)
+├── admin.html          # Painel administrador
 ├── js/
-│   ├── app.js          # Lógica do catálogo
-│   └── products.js     # Dados da empresa e produtos
+│   ├── app.js          # Lógica do catálogo público
+│   ├── admin.js        # Painel admin
+│   ├── auth.js         # Autenticação admin
+│   └── catalog-store.js
 └── assets/             # Logo, infográfico e fotos dos produtos
 ```
