@@ -1,0 +1,275 @@
+import { company, products } from "./products.js";
+
+const state = {
+  search: "",
+  category: "all",
+  sort: "featured",
+};
+
+const formatPrice = (value) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+
+const buildWhatsAppLink = (message) => {
+  const text = encodeURIComponent(message);
+  return `https://wa.me/${company.whatsapp}?text=${text}`;
+};
+
+const getCategories = () =>
+  [...new Set(products.map((product) => product.category))].sort((a, b) =>
+    a.localeCompare(b, "pt-BR")
+  );
+
+const filterProducts = () => {
+  let list = [...products];
+
+  if (state.category !== "all") {
+    list = list.filter((product) => product.category === state.category);
+  }
+
+  if (state.search.trim()) {
+    const term = state.search.trim().toLowerCase();
+    list = list.filter((product) => {
+      const haystack = [
+        product.name,
+        product.code,
+        product.description,
+        product.category,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(term);
+    });
+  }
+
+  switch (state.sort) {
+    case "name-asc":
+      list.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+      break;
+    case "name-desc":
+      list.sort((a, b) => b.name.localeCompare(a.name, "pt-BR"));
+      break;
+    case "price-asc":
+      list.sort((a, b) => a.price - b.price);
+      break;
+    case "price-desc":
+      list.sort((a, b) => b.price - a.price);
+      break;
+    default:
+      list.sort((a, b) => Number(b.featured) - Number(a.featured));
+  }
+
+  return list;
+};
+
+const productImageFallback = (name) => {
+  const label = encodeURIComponent(name.slice(0, 24));
+  return `https://placehold.co/640x480/f4f1ec/1e3a5f?text=${label}`;
+};
+
+const renderProductCard = (product) => {
+  const imageSrc = product.image || productImageFallback(product.name);
+  const quoteMessage = `Olá! Tenho interesse no produto *${product.name}* (${product.code}) — ${formatPrice(product.price)}. Poderia me enviar um orçamento?`;
+
+  return `
+    <article class="product-card" data-id="${product.id}">
+      <div class="product-card__media">
+        ${product.badge ? `<span class="product-card__badge">${product.badge}</span>` : ""}
+        <img src="${imageSrc}" alt="${product.name}" loading="lazy" onerror="this.src='${productImageFallback(product.name)}'" />
+      </div>
+      <div class="product-card__body">
+        <span class="product-card__category">${product.category}</span>
+        <h3 class="product-card__title">${product.name}</h3>
+        <p class="product-card__description">${product.description}</p>
+        <div class="product-card__footer">
+          <div>
+            <span class="product-card__price">${formatPrice(product.price)}</span>
+            <span class="product-card__code">${product.code}</span>
+          </div>
+          <div class="product-card__actions">
+            <button class="icon-btn js-details" data-id="${product.id}" title="Ver detalhes" aria-label="Ver detalhes de ${product.name}">👁</button>
+            <a class="btn btn--primary btn--sm" href="${buildWhatsAppLink(quoteMessage)}" target="_blank" rel="noopener noreferrer">Orçamento</a>
+          </div>
+        </div>
+      </div>
+    </article>
+  `;
+};
+
+const renderProducts = () => {
+  const grid = document.getElementById("product-grid");
+  const empty = document.getElementById("empty-state");
+  const count = document.getElementById("results-count");
+  const clearBtn = document.getElementById("clear-filters");
+  const filtered = filterProducts();
+
+  const hasFilters =
+    state.search.trim() !== "" || state.category !== "all" || state.sort !== "featured";
+
+  clearBtn.hidden = !hasFilters;
+  count.textContent = `${filtered.length} produto${filtered.length === 1 ? "" : "s"} encontrado${filtered.length === 1 ? "" : "s"}`;
+
+  if (!filtered.length) {
+    grid.innerHTML = "";
+    empty.hidden = false;
+    return;
+  }
+
+  empty.hidden = true;
+  grid.innerHTML = filtered.map(renderProductCard).join("");
+};
+
+const openModal = (productId) => {
+  const product = products.find((item) => item.id === productId);
+  if (!product) return;
+
+  const modal = document.getElementById("product-modal");
+  const body = document.getElementById("modal-body");
+  const imageSrc = product.image || productImageFallback(product.name);
+  const quoteMessage = `Olá! Tenho interesse no produto *${product.name}* (${product.code}) — ${formatPrice(product.price)}. Poderia me enviar um orçamento?`;
+
+  body.innerHTML = `
+    <div class="modal__image">
+      <img src="${imageSrc}" alt="${product.name}" onerror="this.src='${productImageFallback(product.name)}'" />
+    </div>
+    <div class="modal__details">
+      <span class="eyebrow">${product.category}</span>
+      <h3>${product.name}</h3>
+      <div class="modal__meta">
+        <span class="tag">${product.code}</span>
+        ${product.badge ? `<span class="tag">${product.badge}</span>` : ""}
+      </div>
+      <p>${product.description}</p>
+      <p class="product-card__price">${formatPrice(product.price)}</p>
+      <a class="btn btn--whatsapp" href="${buildWhatsAppLink(quoteMessage)}" target="_blank" rel="noopener noreferrer">Solicitar orçamento</a>
+    </div>
+  `;
+
+  modal.showModal();
+};
+
+const setupCategoryFilters = () => {
+  const select = document.getElementById("category-filter");
+  const pills = document.getElementById("category-pills");
+  const categories = getCategories();
+
+  select.innerHTML = `<option value="all">Todas</option>${categories
+    .map((category) => `<option value="${category}">${category}</option>`)
+    .join("")}`;
+
+  pills.innerHTML = [
+    `<button class="pill is-active" data-category="all" type="button">Todas</button>`,
+    ...categories.map(
+      (category) =>
+        `<button class="pill" data-category="${category}" type="button">${category}</button>`
+    ),
+  ].join("");
+
+  pills.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-category]");
+    if (!button) return;
+
+    state.category = button.dataset.category;
+    select.value = state.category;
+
+    pills.querySelectorAll(".pill").forEach((pill) => {
+      pill.classList.toggle("is-active", pill.dataset.category === state.category);
+    });
+
+    renderProducts();
+  });
+};
+
+const setupHero = () => {
+  const stats = document.getElementById("hero-stats");
+  const featured = products.find((product) => product.featured) || products[0];
+
+  stats.innerHTML = `
+    <div><dt>Produtos</dt><dd>${products.length}</dd></div>
+    <div><dt>Categorias</dt><dd>${getCategories().length}</dd></div>
+    <div><dt>Atendimento</dt><dd>WhatsApp</dd></div>
+  `;
+
+  document.getElementById("featured-name").textContent = featured.name;
+  document.getElementById("featured-price").textContent = formatPrice(featured.price);
+};
+
+const setupContactLinks = () => {
+  const whatsappUrl = buildWhatsAppLink(company.whatsappMessage);
+  document.getElementById("whatsapp-main").href = whatsappUrl;
+  document.getElementById("header-cta").href = "#contato";
+  document.getElementById("email-main").href = `mailto:${company.email}`;
+};
+
+const setupMenu = () => {
+  const toggle = document.getElementById("menu-toggle");
+  const nav = document.getElementById("mobile-nav");
+
+  toggle.addEventListener("click", () => {
+    const isOpen = nav.classList.toggle("is-open");
+    nav.hidden = !isOpen;
+    toggle.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  nav.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      nav.classList.remove("is-open");
+      nav.hidden = true;
+      toggle.setAttribute("aria-expanded", "false");
+    });
+  });
+};
+
+const setupEvents = () => {
+  document.getElementById("search-input").addEventListener("input", (event) => {
+    state.search = event.target.value;
+    renderProducts();
+  });
+
+  document.getElementById("category-filter").addEventListener("change", (event) => {
+    state.category = event.target.value;
+    document.querySelectorAll("#category-pills .pill").forEach((pill) => {
+      pill.classList.toggle("is-active", pill.dataset.category === state.category);
+    });
+    renderProducts();
+  });
+
+  document.getElementById("sort-filter").addEventListener("change", (event) => {
+    state.sort = event.target.value;
+    renderProducts();
+  });
+
+  document.getElementById("clear-filters").addEventListener("click", () => {
+    state.search = "";
+    state.category = "all";
+    state.sort = "featured";
+    document.getElementById("search-input").value = "";
+    document.getElementById("category-filter").value = "all";
+    document.getElementById("sort-filter").value = "featured";
+    document.querySelectorAll("#category-pills .pill").forEach((pill) => {
+      pill.classList.toggle("is-active", pill.dataset.category === "all");
+    });
+    renderProducts();
+  });
+
+  document.getElementById("product-grid").addEventListener("click", (event) => {
+    const button = event.target.closest(".js-details");
+    if (!button) return;
+    openModal(button.dataset.id);
+  });
+
+  document.getElementById("modal-close").addEventListener("click", () => {
+    document.getElementById("product-modal").close();
+  });
+};
+
+document.getElementById("year").textContent = String(new Date().getFullYear());
+
+setupCategoryFilters();
+setupHero();
+setupContactLinks();
+setupMenu();
+setupEvents();
+renderProducts();
