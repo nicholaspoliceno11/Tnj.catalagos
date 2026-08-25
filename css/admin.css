@@ -253,8 +253,17 @@
 
 .admin-form__error {
   margin: 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 92, 92, 0.12);
+  border: 1px solid rgba(255, 92, 92, 0.35);
   color: #ff8a8a;
   font-size: 0.9rem;
+}
+
+#login-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .admin-form__hint {

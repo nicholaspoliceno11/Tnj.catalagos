@@ -3,7 +3,12 @@ const ADMIN_EMAIL = "nicholas.maceio.al@gmail.com";
 const ADMIN_PASSWORD_HASH = "223dd58dd888801f29a153a3127b9532503b119531338c1596dd626ac9204ecd";
 
 const hashPassword = async (password) => {
-  const data = new TextEncoder().encode(password);
+  if (!window.crypto?.subtle) {
+    throw new Error("Seu navegador não suporta login seguro. Use Chrome, Firefox ou Edge atualizado.");
+  }
+
+  const value = password.trim();
+  const data = new TextEncoder().encode(value);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   return Array.from(new Uint8Array(hashBuffer))
     .map((byte) => byte.toString(16).padStart(2, "0"))
@@ -15,7 +20,7 @@ export const login = async (email, password) => {
   const passwordHash = await hashPassword(password);
 
   if (normalizedEmail !== ADMIN_EMAIL || passwordHash !== ADMIN_PASSWORD_HASH) {
-    throw new Error("E-mail ou senha incorretos.");
+    throw new Error("E-mail ou senha incorretos. Verifique e tente novamente.");
   }
 
   const session = {

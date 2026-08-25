@@ -1,5 +1,10 @@
 const STORAGE_KEY = "tnj3d_catalog_v1";
-const CATALOG_PATH = "data/catalog.json";
+
+const getCatalogUrl = () => {
+  const path = window.location.pathname;
+  const base = path.endsWith("/") ? path : path.replace(/\/[^/]*$/, "/");
+  return `${base}data/catalog.json`;
+};
 
 export const loadCatalog = async () => {
   const cached = localStorage.getItem(STORAGE_KEY);
@@ -11,7 +16,7 @@ export const loadCatalog = async () => {
     }
   }
 
-  const response = await fetch(`${CATALOG_PATH}?t=${Date.now()}`);
+  const response = await fetch(`${getCatalogUrl()}?t=${Date.now()}`);
   if (!response.ok) {
     throw new Error("Não foi possível carregar o catálogo.");
   }

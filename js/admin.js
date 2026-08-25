@@ -9,6 +9,7 @@ import {
 const TOKEN_KEY = "tnj3d_github_token";
 let catalog = null;
 let editingProductId = null;
+let appReady = false;
 
 const formatPrice = (value) => {
   if (value === null || value === undefined) return "Sob consulta";
@@ -17,6 +18,7 @@ const formatPrice = (value) => {
 
 const showAlert = (message, type = "success") => {
   const alert = document.getElementById("admin-alert");
+  if (!alert) return;
   alert.textContent = message;
   alert.className = `admin-alert admin-alert--${type}`;
   alert.hidden = false;
@@ -25,8 +27,31 @@ const showAlert = (message, type = "success") => {
   }, 5000);
 };
 
+const setLoginLoading = (loading) => {
+  const button = document.getElementById("login-submit-btn");
+  if (!button) return;
+  button.disabled = loading || !appReady;
+  button.textContent = loading ? "Entrando..." : "Entrar";
+};
+
+const showLoginError = (message) => {
+  const errorEl = document.getElementById("login-error");
+  if (!errorEl) return;
+  errorEl.textContent = message;
+  errorEl.hidden = false;
+};
+
+const clearLoginError = () => {
+  const errorEl = document.getElementById("login-error");
+  if (!errorEl) return;
+  errorEl.textContent = "";
+  errorEl.hidden = true;
+};
+
 const renderProductsTable = () => {
   const tbody = document.getElementById("products-table");
+  if (!tbody || !catalog) return;
+
   tbody.innerHTML = catalog.products
     .map(
       (product) => `
@@ -47,6 +72,7 @@ const renderProductsTable = () => {
 };
 
 const fillCompanyForm = () => {
+  if (!catalog) return;
   document.getElementById("company-name").value = catalog.company.name;
   document.getElementById("company-tagline").value = catalog.company.tagline || "";
   document.getElementById("company-whatsapp").value = catalog.company.whatsapp;
@@ -72,7 +98,7 @@ const openProductModal = (product = null) => {
   document.getElementById("product-featured").checked = Boolean(product?.featured);
   document.getElementById("product-description").value = product?.description || "";
   document.getElementById("product-benefit").value = product?.benefit || "";
-  document.getElementById("product-modal").showModal();
+  document.getElementById("admin-product-modal").showModal();
 };
 
 const saveProductFromForm = (event) => {
@@ -102,7 +128,7 @@ const saveProductFromForm = (event) => {
 
   saveCatalog(catalog);
   renderProductsTable();
-  document.getElementById("product-modal").close();
+  document.getElementById("admin-product-modal").close();
   showAlert("Produto salvo localmente. Clique em Publicar catálogo para atualizar o site.");
 };
 
@@ -118,19 +144,20 @@ const showLoginView = () => {
   document.getElementById("admin-view").hidden = true;
 };
 
-const init = async () => {
-  catalog = await loadCatalog();
+const setupLoginForm = () => {
+  const form = document.getElementById("login-form");
+  if (!form) return;
 
-  if (isAuthenticated()) {
-    showAdminView();
-  } else {
-    showLoginView();
-  }
-
-  document.getElementById("login-form").addEventListener("submit", async (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const errorEl = document.getElementById("login-error");
-    errorEl.hidden = true;
+    clearLoginError();
+
+    if (!appReady) {
+      showLoginError("Aguarde o carregamento do painel e tente novamente.");
+      return;
+    }
+
+    setLoginLoading(true);
 
     try {
       await login(
@@ -139,11 +166,14 @@ const init = async () => {
       );
       showAdminView();
     } catch (error) {
-      errorEl.textContent = error.message;
-      errorEl.hidden = false;
+      showLoginError(error.message || "Não foi possível entrar.");
+    } finally {
+      setLoginLoading(false);
     }
   });
+};
 
+const setupAdminEvents = () => {
   document.getElementById("logout-btn").addEventListener("click", () => {
     logout();
     showLoginView();
@@ -169,10 +199,10 @@ const init = async () => {
   document.getElementById("new-product-btn").addEventListener("click", () => openProductModal());
   document.getElementById("product-form").addEventListener("submit", saveProductFromForm);
   document.getElementById("cancel-product-btn").addEventListener("click", () => {
-    document.getElementById("product-modal").close();
+    document.getElementById("admin-product-modal").close();
   });
   document.getElementById("modal-close").addEventListener("click", () => {
-    document.getElementById("product-modal").close();
+    document.getElementById("admin-product-modal").close();
   });
 
   document.getElementById("products-table").addEventListener("click", (event) => {
@@ -248,6 +278,29 @@ const init = async () => {
   const savedToken = sessionStorage.getItem(TOKEN_KEY);
   if (savedToken) {
     document.getElementById("github-token").value = savedToken;
+  }
+};
+
+const init = async () => {
+  setupLoginForm();
+  setLoginLoading(true);
+
+  try {
+    catalog = await loadCatalog();
+    appReady = true;
+    setupAdminEvents();
+
+    if (isAuthenticated()) {
+      showAdminView();
+    } else {
+      showLoginView();
+    }
+  } catch (error) {
+    appReady = true;
+    showLoginError("Erro ao carregar catálogo. Recarregue a página.");
+    console.error(error);
+  } finally {
+    setLoginLoading(false);
   }
 };
 
