@@ -4,7 +4,7 @@
   "scripts": {
     "deploy": "firebase deploy --only hosting --project tnj-3d-catalogo",
     "login": "firebase login",
-    "login:ci": "firebase login:ci",
+    "login:ci": "firebase login:ci --no-localhost",
     "serve": "firebase emulators:start --only hosting --project tnj-3d-catalogo"
   },
   "devDependencies": {

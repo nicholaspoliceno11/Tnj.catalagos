@@ -21,30 +21,43 @@ Guia para publicar o catálogo no **Firebase Hosting**.
 
 ---
 
-## Passo 2 — Gerar o token (Cloud Shell ou terminal)
+## Passo 2 — Gerar o token
 
-### ⚠️ Comando correto
+### ⚠️ Se você está no **Google Cloud Shell** (use `--no-localhost`)
 
-O pacote npm se chama **`firebase-tools`**, não `firebase`. Use um destes:
+No Cloud Shell o login normal **não funciona** — ao clicar em "Permitir", o navegador tenta abrir `localhost:9005` no seu PC e dá erro **"conexão recusada"**.
+
+**Use este comando:**
 
 ```bash
-# Opção A — direto (recomendado no Cloud Shell)
+npx firebase-tools login:ci --no-localhost
+```
+
+Fluxo:
+1. O terminal mostra um **link** — abra no navegador
+2. Clique em **Permitir**
+3. A página mostra um **código** (não redireciona para localhost)
+4. **Copie o código** e cole de volta no terminal do Cloud Shell
+5. O terminal exibe o **token** — copie e guarde
+
+---
+
+### Se está no seu computador (Windows/Mac)
+
+```bash
 npx firebase-tools login:ci
+```
 
-# Opção B — instalar globalmente primeiro
-npm install -g firebase-tools
-firebase login:ci
+Ou dentro do repositório:
 
-# Opção C — dentro do repositório clonado
+```bash
 git clone https://github.com/nicholaspoliceno11/Tnj.catalagos.git
 cd Tnj.catalagos
 npm install
 npm run login:ci
 ```
 
-> **Não use** `npx firebase login:ci` — isso gera o erro `could not determine executable to run`.
-
-O comando abre o navegador para login. Ao final, copie o **token** exibido no terminal (começa com algo como `1//...`).
+> **Não use** `npx firebase login:ci` — gera o erro `could not determine executable to run`.
 
 ---
 
@@ -74,15 +87,15 @@ Aguarde 1–2 minutos e acesse: **https://tnj-3d-catalogo.web.app**
 
 ## Alternativa — Deploy direto pelo Cloud Shell
 
-Se preferir publicar sem GitHub Actions:
-
 ```bash
 git clone https://github.com/nicholaspoliceno11/Tnj.catalagos.git
 cd Tnj.catalagos
 npm install
-npx firebase-tools login
+npx firebase-tools login --no-localhost
 npx firebase-tools deploy --only hosting --project tnj-3d-catalogo
 ```
+
+> No Cloud Shell, sempre use `--no-localhost` no login.
 
 ---
 
@@ -105,5 +118,6 @@ Depois do primeiro deploy:
 | Erro | Causa | Solução |
 |------|-------|---------|
 | `could not determine executable to run` | Comando `npx firebase` errado | Use `npx firebase-tools login:ci` |
+| `localhost` conexão recusada ao clicar Permitir | Login no Cloud Shell sem `--no-localhost` | Use `npx firebase-tools login:ci --no-localhost` |
 | Site Not Found em `.web.app` | Nenhum deploy feito ainda | Gere token + adicione `FIREBASE_TOKEN` no GitHub |
 | Deploy falha no GitHub Actions | Secret ausente ou inválido | Recrie o token com `login:ci` e atualize o secret |

@@ -10,7 +10,19 @@ Dashboard de catálogo digital para apresentar itens à venda da empresa. Layout
 
 > ⚠️ Não use `Tnj.catalogos` — esse endereço não existe e retorna 404.
 
-### Publicar (primeira vez)
+### Firebase Hosting
+
+**https://tnj-3d-catalogo.web.app** (após configurar deploy)
+
+Guia completo: **[FIREBASE_SETUP.md](./FIREBASE_SETUP.md)**
+
+Resumo rápido:
+1. Firebase Console → Hosting → **Começar**
+2. Gerar token: `npx firebase-tools login:ci --no-localhost` (no Cloud Shell; no PC pode omitir `--no-localhost`)
+3. GitHub → Secrets → `FIREBASE_TOKEN`
+4. Rodar workflow **Deploy Firebase Hosting** em Actions
+
+### Publicar no GitHub Pages (primeira vez)
 
 1. Abra [Settings → Pages](https://github.com/nicholaspoliceno11/Tnj.catalagos/settings/pages)
 2. Em **Source**, selecione **GitHub Actions**
