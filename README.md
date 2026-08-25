@@ -30,20 +30,26 @@ Coloque os arquivos na pasta `assets/`:
 
 > Enquanto a logo não for adicionada, o site exibe o nome **TNJ** como fallback.
 
-### 2. Produtos
+## Personalizar produtos
 
-Edite `js/products.js`:
+### Painel administrador
 
-- `company` — nome, WhatsApp, e-mail e mensagem padrão
-- `products` — lista de itens (nome, categoria, código, preço, descrição, imagem)
+Acesse **/admin.html** para gerenciar o catálogo:
 
-### 3. WhatsApp
+- Login com e-mail e senha do administrador
+- Editar preços, descrições e benefícios
+- Adicionar e excluir produtos
+- Publicar alterações no site
 
-Altere o número em `company.whatsapp` (formato: código do país + DDD + número, sem espaços):
+### Publicar alterações para todos os visitantes
 
-```js
-whatsapp: "5582999999999"
-```
+1. Faça login em `admin.html`
+2. Vá em **Configurações** e adicione um [GitHub Personal Access Token](https://github.com/settings/tokens) com permissão de escrita no repositório
+3. Clique em **Publicar catálogo**
+
+Sem token, o sistema baixa o arquivo `catalog.json` para você enviar manualmente.
+
+Os dados ficam em `data/catalog.json`.
 
 ## Visualizar localmente
 

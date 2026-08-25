@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | TNJ 3D Catálogo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Exo+2:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+</head>
+<body class="admin-page">
+  <div id="login-view" class="admin-login container">
+    <div class="admin-login__card">
+      <img src="assets/logo.png" alt="TNJ 3D" class="admin-login__logo" />
+      <h1>Painel Administrador</h1>
+      <p>Gerencie produtos, preços e categorias do catálogo TNJ 3D.</p>
+      <form id="login-form" class="admin-form">
+        <label>
+          E-mail
+          <input type="email" id="login-email" required autocomplete="username" />
+        </label>
+        <label>
+          Senha
+          <input type="password" id="login-password" required autocomplete="current-password" />
+        </label>
+        <p class="admin-form__error" id="login-error" hidden></p>
+        <button type="submit" class="btn btn--primary btn--lg">Entrar</button>
+      </form>
+      <a href="index.html" class="admin-login__back">← Voltar ao catálogo</a>
+    </div>
+  </div>
+
+  <div id="admin-view" class="admin-layout" hidden>
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar__brand">
+        <img src="assets/logo.png" alt="TNJ 3D" />
+        <div>
+          <strong>TNJ 3D</strong>
+          <span>Administrador</span>
+        </div>
+      </div>
+      <nav class="admin-nav">
+        <button type="button" class="admin-nav__item is-active" data-panel="products">Produtos</button>
+        <button type="button" class="admin-nav__item" data-panel="settings">Configurações</button>
+      </nav>
+      <div class="admin-sidebar__footer">
+        <a href="index.html" class="btn btn--ghost btn--sm">Ver catálogo</a>
+        <button type="button" class="btn btn--outline btn--sm" id="logout-btn">Sair</button>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-header">
+        <div>
+          <h1 id="panel-title">Produtos</h1>
+          <p id="panel-subtitle">Edite preços, descrições e adicione novos itens.</p>
+        </div>
+        <div class="admin-header__actions">
+          <button type="button" class="btn btn--ghost btn--sm" id="export-btn">Exportar JSON</button>
+          <button type="button" class="btn btn--primary btn--sm" id="publish-btn">Publicar catálogo</button>
+        </div>
+      </header>
+
+      <div id="admin-alert" class="admin-alert" hidden></div>
+
+      <section id="products-panel" class="admin-panel">
+        <div class="admin-panel__toolbar">
+          <button type="button" class="btn btn--primary" id="new-product-btn">+ Novo produto</button>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Código</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="products-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="settings-panel" class="admin-panel" hidden>
+        <form id="company-form" class="admin-form admin-form--grid">
+          <h2>Dados da empresa</h2>
+          <label>Nome<input type="text" id="company-name" required /></label>
+          <label>Tagline<input type="text" id="company-tagline" /></label>
+          <label>WhatsApp (com DDI)<input type="text" id="company-whatsapp" required /></label>
+          <label>E-mail<input type="email" id="company-email" required /></label>
+          <label class="admin-form__full">Mensagem padrão WhatsApp<textarea id="company-message" rows="3"></textarea></label>
+          <label>Categoria padrão<input type="text" id="default-category" /></label>
+          <div class="admin-form__full">
+            <button type="submit" class="btn btn--primary">Salvar configurações</button>
+          </div>
+        </form>
+
+        <form id="github-form" class="admin-form admin-form--grid admin-form--section">
+          <h2>Publicação no GitHub (opcional)</h2>
+          <p class="admin-form__hint">
+            Para que todos os visitantes vejam as alterações, informe um
+            <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer">Personal Access Token</a>
+            com permissão de escrita no repositório. O token fica salvo apenas nesta sessão do navegador.
+          </p>
+          <label class="admin-form__full">
+            GitHub Token
+            <input type="password" id="github-token" placeholder="ghp_..." autocomplete="off" />
+          </label>
+          <div class="admin-form__full">
+            <button type="button" class="btn btn--outline" id="save-token-btn">Salvar token nesta sessão</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <dialog class="modal admin-modal" id="product-modal">
+    <div class="modal__content">
+      <button class="modal__close" id="modal-close" aria-label="Fechar">&times;</button>
+      <form id="product-form" class="admin-form admin-form--grid">
+        <h2 id="product-form-title">Novo produto</h2>
+        <label>Nome<input type="text" id="product-name" required /></label>
+        <label>Código<input type="text" id="product-code" required /></label>
+        <label>Subtítulo<input type="text" id="product-subtitle" /></label>
+        <label>Categoria<input type="text" id="product-category" required /></label>
+        <label>Preço (R$)<input type="number" id="product-price" min="0" step="0.01" placeholder="Deixe vazio para 'Sob consulta'" /></label>
+        <label>Badge<input type="text" id="product-badge" placeholder="Ex.: Destaque, Novo" /></label>
+        <label>URL da imagem<input type="text" id="product-image" placeholder="assets/produtos/nome.png" /></label>
+        <label class="admin-form__checkbox">
+          <input type="checkbox" id="product-featured" />
+          Destaque no catálogo
+        </label>
+        <label class="admin-form__full">Descrição curta<textarea id="product-description" rows="2" required></textarea></label>
+        <label class="admin-form__full">Para que serve?<textarea id="product-benefit" rows="5"></textarea></label>
+        <div class="admin-form__full admin-form__actions">
+          <button type="button" class="btn btn--ghost" id="cancel-product-btn">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Salvar produto</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

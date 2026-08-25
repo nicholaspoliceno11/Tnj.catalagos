@@ -713,8 +713,13 @@ select {
   gap: 0.75rem;
 }
 
-.footer code {
+.footer__note a {
+  color: var(--color-muted);
   font-size: 0.82rem;
+}
+
+.footer__note a:hover {
+  color: var(--color-accent);
 }
 
 .modal {

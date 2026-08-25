@@ -1,4 +1,8 @@
-import { company, products, defaultCategory } from "./products.js";
+import { loadCatalog } from "./catalog-store.js";
+
+let company = {};
+let products = [];
+let defaultCategory = "Brinquedos Sensoriais";
 
 const state = {
   search: "",
@@ -56,10 +60,10 @@ const filterProducts = () => {
       list.sort((a, b) => b.name.localeCompare(a.name, "pt-BR"));
       break;
     case "price-asc":
-      list.sort((a, b) => a.price - b.price);
+      list.sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
       break;
     case "price-desc":
-      list.sort((a, b) => b.price - a.price);
+      list.sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
       break;
     default:
       list.sort((a, b) => Number(b.featured) - Number(a.featured));
@@ -214,8 +218,8 @@ const setupHero = () => {
     <div><dt>Atendimento</dt><dd>WhatsApp</dd></div>
   `;
 
-  document.getElementById("featured-name").textContent = featured.name;
-  document.getElementById("featured-price").textContent = formatPrice(featured.price);
+  document.getElementById("featured-name").textContent = featured?.name || "—";
+  document.getElementById("featured-price").textContent = formatPrice(featured?.price);
 };
 
 const setupContactLinks = () => {
@@ -287,11 +291,26 @@ const setupEvents = () => {
   });
 };
 
-document.getElementById("year").textContent = String(new Date().getFullYear());
+const init = async () => {
+  try {
+    const catalog = await loadCatalog();
+    company = catalog.company;
+    products = catalog.products;
+    defaultCategory = catalog.defaultCategory || "Brinquedos Sensoriais";
+    state.category = defaultCategory;
+  } catch (error) {
+    document.getElementById("results-count").textContent = "Erro ao carregar catálogo.";
+    console.error(error);
+    return;
+  }
 
-setupCategoryFilters();
-setupHero();
-setupContactLinks();
-setupMenu();
-setupEvents();
-renderProducts();
+  document.getElementById("year").textContent = String(new Date().getFullYear());
+  setupCategoryFilters();
+  setupHero();
+  setupContactLinks();
+  setupMenu();
+  setupEvents();
+  renderProducts();
+};
+
+init();

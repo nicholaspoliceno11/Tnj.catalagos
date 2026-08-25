@@ -1,0 +1,112 @@
+{
+  "company": {
+    "name": "TNJ 3D",
+    "tagline": "Premium & Prototipagem",
+    "whatsapp": "5582999999999",
+    "email": "contato@tnj3d.com.br",
+    "whatsappMessage": "Olá! Gostaria de solicitar um orçamento pelo catálogo TNJ 3D."
+  },
+  "defaultCategory": "Brinquedos Sensoriais",
+  "products": [
+    {
+      "id": "bs-001",
+      "name": "Estrela Sensorial Colapsável",
+      "subtitle": "Foco Visual e Movimento Fractal",
+      "category": "Brinquedos Sensoriais",
+      "code": "BS-001",
+      "price": null,
+      "featured": true,
+      "badge": "Destaque",
+      "description": "Estrutura geométrica articulada que expande e recolhe em movimento espiral hipnótico.",
+      "benefit": "Este brinquedo serve para proporcionar relaxamento visual imediato e canalização da agitação motora. Sua estrutura geométrica articulada expande-se e recolhe-se em um movimento espiral hipnótico, criando um efeito fractal que acalma a mente. É excelente para quem precisa de um foco visual para desacelerar pensamentos acelerados durante o trabalho ou estudo, funcionando também como uma peça de decoração interativa para a mesa.",
+      "image": "assets/produtos/estrela-sensorial.png"
+    },
+    {
+      "id": "bs-002",
+      "name": "Rolo de Pressão Sensorial com Spikes",
+      "subtitle": "Pressão Profunda e Massagem Tátil",
+      "category": "Brinquedos Sensoriais",
+      "code": "BS-002",
+      "price": null,
+      "featured": true,
+      "description": "Rolo serrilhado para estimulação tátil intensa e alívio de tensão nas mãos e na pele.",
+      "benefit": "Projetado para oferecer estimulação tátil intensa e alívio de tensão, este rolo serrilhado é uma ferramenta poderosa contra a ansiedade. Ele serve para substituir comportamentos nocivos (como roer unhas ou beliscar a pele) ao fornecer uma sensação de pico ou pressão firme que acalma o sistema nervoso. Ao ser rolado entre as mãos ou sobre a pele, estimula a circulação e promove descompressão física rápida.",
+      "image": "assets/produtos/rolo-pressao.png"
+    },
+    {
+      "id": "bs-003",
+      "name": "Bola Fidget Giratória (Vortex)",
+      "subtitle": "Transformação Cinética e Feedback Tátil Suave",
+      "category": "Brinquedos Sensoriais",
+      "code": "BS-003",
+      "price": null,
+      "featured": true,
+      "badge": "Popular",
+      "description": "Transforma-se de esfera compacta em vórtice helicoidal com deslize suave e contínuo.",
+      "benefit": "Este brinquedo serve para ancorar a atenção através da transformação física. Ele se transforma dinamicamente de uma esfera compacta em um vórtice helicoidal aberto quando girado ou puxado. O deslize contínuo e suave das peças articuladas oferece um feedback tátil satisfatório, enquanto o movimento rítmico do vórtice cria um efeito visual calmante, ideal para manter o foco durante tarefas cognitivas longas.",
+      "image": "assets/produtos/bola-vortex.png"
+    },
+    {
+      "id": "bs-004",
+      "name": "Cubo Infinito (Infinity Cube)",
+      "subtitle": "Movimento Contínuo e Uso Discreto com Uma Mão",
+      "category": "Brinquedos Sensoriais",
+      "code": "BS-004",
+      "price": null,
+      "featured": false,
+      "description": "8 cubos articulados que se dobram em ciclo infinito — silencioso e discreto.",
+      "benefit": "O Cubo Infinito serve para manter as mãos ocupadas de forma intuitiva e silenciosa. Composto por 8 cubos articulados que se dobram e giram em um ciclo sem fim, ele permite uma operação constante e ritmada usando apenas uma das mãos. É a ferramenta perfeita para aliviar a inquietação motora e tiques nervosos (como batucar dedos) em ambientes corporativos ou de estudo, sem causar distração visual ou sonora.",
+      "image": "assets/produtos/cubo-infinito.png"
+    },
+    {
+      "id": "bs-005",
+      "name": "Fidget de Bolinhas Orbitais (Marbles Fidget)",
+      "subtitle": "Coordenação Motora Fina e Textura Dupla",
+      "category": "Brinquedos Sensoriais",
+      "code": "BS-005",
+      "price": null,
+      "featured": false,
+      "description": "Superfície texturizada externa com bolinhas que deslizam por trilhos orbitais internos.",
+      "benefit": "Este brinquedo serve para desenvolver a destreza manual e oferecer autorregulação sensorial. Ele combina uma superfície externa texturizada (para massagem tátil) com bolinhas internas que deslizam por trilhos orbitais. Empurrar e guiar as esferas pelos canais exige precisão, fortalecendo a coordenação motora fina. O movimento repetitivo e contínuo das bolinhas ajuda a acalmar a mente e manter o foco ancorado.",
+      "image": "assets/produtos/marbles-fidget.png"
+    },
+    {
+      "id": "bs-006",
+      "name": "Brinquedo Sensorial Zíper Flexível",
+      "subtitle": "Articulação Bilateral e Clique Satisfatório",
+      "category": "Brinquedos Sensoriais",
+      "code": "BS-006",
+      "price": null,
+      "featured": false,
+      "description": "Zíper em escala ampliada com corrente flexível e clique suave a cada deslize.",
+      "benefit": "Simulando um zíper em escala ampliada, este brinquedo serve para fornecer um foco tátil e auditivo rítmico. O deslize do cursor pelos dentes articulados gera um clique suave e satisfatório, enquanto a corrente totalmente flexível permite dobrar, girar e balançar o objeto. É excelente para terapia ocupacional, auxiliando na coordenação motora bilateral e oferecendo uma válvula de escape repetitiva para a ansiedade.",
+      "image": "assets/produtos/ziper-flexivel.png"
+    },
+    {
+      "id": "bs-007",
+      "name": "Joy Fidget — Joystick Sensorial",
+      "subtitle": "Ergonomia Familiar e Descompressão Tátil",
+      "category": "Brinquedos Sensoriais",
+      "code": "BS-007",
+      "price": null,
+      "featured": false,
+      "badge": "Novo",
+      "description": "Joystick sensorial com movimento 360°, inclinação e clique — discreto para uma mão.",
+      "benefit": "Este dispositivo serve para reproduzir a sensação tátil reconfortante de um controle de videogame. Com movimento multidirecional de 360°, inclinação e sensação de clique, ele oferece uma forma familiar e ergonômica de aliviar o estresse. É ideal para uso discreto com uma mão durante reuniões ou chamadas, ajudando a canalizar a energia da agitação motora para um objeto seguro e satisfatório.",
+      "image": "assets/produtos/joy-fidget.png"
+    },
+    {
+      "id": "bs-008",
+      "name": "Cone de Passagem Impossível",
+      "subtitle": "Ilusão de Ótica, Gravidade e Foco Visual",
+      "category": "Brinquedos Sensoriais",
+      "code": "BS-008",
+      "price": null,
+      "featured": true,
+      "badge": "Hipnótico",
+      "description": "Dois cones espiralados que parecem atravessar um ao outro com deslize suave pela gravidade.",
+      "benefit": "Este objeto serve para promover relaxamento mental através de uma ilusão de ótica e deslize fluido. Composto por dois cones espiralados que parecem atravessar um ao outro de forma impossível, ele gera um efeito visual hipnótico e surpreendente. O deslize impulsionado pela gravidade é extremamente suave, oferecendo um feedback tátil e visual relaxante que ajuda a desacelerar pensamentos agitados, servindo também como uma peça de design interativa para a mesa.",
+      "image": "assets/produtos/cone-passagem.png"
+    }
+  ]
+}
