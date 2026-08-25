@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Dashboard de catálogo de itens para venda da empresa TNJ."
+    />
+    <title>TNJ | Catálogo de Itens</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <nav class="topbar" aria-label="Navegação principal">
+        <a class="brand" href="#inicio" aria-label="TNJ Catálogos">
+          <span class="logo-shell">
+            <img src="assets/logo.png" alt="Logo da TNJ" data-fallback-logo />
+            <span class="logo-fallback" aria-hidden="true">TNJ</span>
+          </span>
+          <span>
+            <strong>TNJ</strong>
+            <small>Catálogo de vendas</small>
+          </span>
+        </a>
+        <div class="nav-actions">
+          <a href="#catalogo">Ver itens</a>
+          <a class="button button-ghost" href="#contato">Solicitar orçamento</a>
+        </div>
+      </nav>
+
+      <section class="hero-grid" id="inicio">
+        <div class="hero-copy">
+          <span class="eyebrow">Dashboard comercial</span>
+          <h1>Catálogo digital para apresentar itens e receber pedidos.</h1>
+          <p>
+            Organize os produtos por categoria, destaque os itens principais e
+            compartilhe este link com clientes para acelerar vendas e cotações.
+          </p>
+          <div class="hero-actions">
+            <a class="button" href="#catalogo">Explorar catálogo</a>
+            <a class="button button-secondary" href="#infografico">Ver infográfico</a>
+          </div>
+        </div>
+
+        <aside class="hero-panel" aria-label="Resumo do catálogo">
+          <div class="metric-card">
+            <span class="metric-number" data-total-products>0</span>
+            <span class="metric-label">itens cadastrados</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-number">4</span>
+            <span class="metric-label">categorias de venda</span>
+          </div>
+          <div class="highlight-card">
+            <span>Contato rápido</span>
+            <strong>Pedido por WhatsApp ou e-mail em poucos cliques.</strong>
+          </div>
+        </aside>
+      </section>
+    </header>
+
+    <main>
+      <section class="section intro-section" id="infografico">
+        <div class="section-heading">
+          <span class="eyebrow">Material visual</span>
+          <h2>Infográfico da empresa</h2>
+          <p>
+            Substitua o arquivo em <code>assets/infografico.png</code> pelo
+            infográfico criado para exibir a arte oficial neste espaço.
+          </p>
+        </div>
+        <figure class="infographic-card">
+          <img
+            src="assets/infografico.png"
+            alt="Infográfico comercial da TNJ"
+            data-fallback-infographic
+          />
+          <figcaption>
+            <strong>Adicione o infográfico aqui.</strong>
+            <span>Use PNG, JPG, WEBP ou SVG com o nome indicado no README.</span>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="section catalog-section" id="catalogo">
+        <div class="section-heading">
+          <span class="eyebrow">Catálogo</span>
+          <h2>Itens disponíveis para venda</h2>
+          <p>
+            Pesquise por nome, categoria ou destaque para encontrar rapidamente
+            o item ideal.
+          </p>
+        </div>
+
+        <div class="catalog-toolbar" aria-label="Filtros do catálogo">
+          <label class="search-box">
+            <span>Buscar item</span>
+            <input
+              type="search"
+              id="searchInput"
+              placeholder="Digite nome, código ou categoria"
+              autocomplete="off"
+            />
+          </label>
+          <div class="filter-buttons" id="categoryFilters" aria-label="Categorias"></div>
+        </div>
+
+        <div class="catalog-grid" id="catalogGrid" aria-live="polite"></div>
+        <p class="empty-state" id="emptyState" hidden>
+          Nenhum item encontrado com os filtros atuais.
+        </p>
+      </section>
+
+      <section class="section steps-section">
+        <div class="section-heading">
+          <span class="eyebrow">Como usar</span>
+          <h2>Fluxo simples para o cliente</h2>
+        </div>
+        <div class="steps-grid">
+          <article>
+            <span>01</span>
+            <h3>Escolha os itens</h3>
+            <p>O cliente navega pelo catálogo e seleciona os produtos de interesse.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Solicite orçamento</h3>
+            <p>O botão de contato leva direto para WhatsApp ou e-mail comercial.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Feche a venda</h3>
+            <p>A equipe confirma disponibilidade, valores e condições de entrega.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section contact-section" id="contato">
+        <div>
+          <span class="eyebrow">Fale com a TNJ</span>
+          <h2>Pronto para vender com um link profissional?</h2>
+          <p>
+            Atualize os contatos abaixo com os dados oficiais da empresa e
+            compartilhe o catálogo com seus clientes.
+          </p>
+        </div>
+        <div class="contact-actions">
+          <a
+            class="button"
+            href="https://wa.me/5500000000000?text=Ol%C3%A1%2C%20tenho%20interesse%20nos%20itens%20do%20cat%C3%A1logo%20TNJ."
+            target="_blank"
+            rel="noreferrer"
+          >
+            Chamar no WhatsApp
+          </a>
+          <a class="button button-secondary" href="mailto:comercial@empresa.com">
+            Enviar e-mail
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>TNJ Catálogos</span>
+      <span>Atualize produtos, imagens e contatos conforme a operação da empresa.</span>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
