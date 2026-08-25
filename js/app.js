@@ -66,7 +66,7 @@ const filterProducts = () => {
 
 const productImageFallback = (name) => {
   const label = encodeURIComponent(name.slice(0, 24));
-  return `https://placehold.co/640x480/f4f1ec/1e3a5f?text=${label}`;
+  return `https://placehold.co/640x480/181c27/5cff8a?text=${label}`;
 };
 
 const renderProductCard = (product) => {

@@ -1,25 +1,30 @@
 :root {
-  --color-bg: #f4f1ec;
-  --color-surface: #ffffff;
-  --color-surface-2: #faf8f5;
-  --color-ink: #1a1f2e;
-  --color-muted: #5c6478;
-  --color-line: #e4dfd6;
-  --color-primary: #1e3a5f;
-  --color-primary-dark: #142a45;
-  --color-accent: #c9a227;
-  --color-accent-soft: #f5ecd3;
-  --color-success: #1f7a4d;
+  --color-bg: #0c0e14;
+  --color-bg-elevated: #12151d;
+  --color-surface: #181c27;
+  --color-surface-2: #1f2433;
+  --color-ink: #eef1f8;
+  --color-muted: #9aa3b8;
+  --color-line: #2a3142;
+  --color-primary: #7b4fd4;
+  --color-primary-dark: #5a35b8;
+  --color-blue: #5b8cff;
+  --color-accent: #5cff8a;
+  --color-accent-soft: rgba(92, 255, 138, 0.12);
+  --color-success: #5cff8a;
   --color-whatsapp: #25d366;
-  --shadow-sm: 0 2px 8px rgba(26, 31, 46, 0.06);
-  --shadow-md: 0 12px 40px rgba(26, 31, 46, 0.1);
-  --shadow-lg: 0 24px 60px rgba(26, 31, 46, 0.14);
+  --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 0 40px rgba(123, 79, 212, 0.25);
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 24px;
   --container: 1180px;
   --font-sans: "DM Sans", system-ui, sans-serif;
-  --font-display: "Playfair Display", Georgia, serif;
+  --font-display: "Exo 2", system-ui, sans-serif;
+  --gradient-brand: linear-gradient(135deg, var(--color-primary) 0%, var(--color-blue) 55%, var(--color-accent) 100%);
+  --gradient-surface: linear-gradient(180deg, rgba(24, 28, 39, 0.95), rgba(12, 14, 20, 0.98));
 }
 
 *,
@@ -88,13 +93,13 @@ select {
 }
 
 .btn--primary {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-  color: #fff;
-  box-shadow: var(--shadow-sm);
+  background: var(--gradient-brand);
+  color: #0c0e14;
+  box-shadow: var(--shadow-sm), 0 0 20px rgba(123, 79, 212, 0.3);
 }
 
 .btn--primary:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), 0 0 28px rgba(92, 255, 138, 0.25);
 }
 
 .btn--outline {
@@ -103,9 +108,20 @@ select {
   color: var(--color-ink);
 }
 
+.btn--outline:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
 .btn--ghost {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.04);
   border-color: var(--color-line);
+  color: var(--color-ink);
+}
+
+.btn--ghost:hover {
+  border-color: var(--color-primary);
+  background: rgba(123, 79, 212, 0.1);
 }
 
 .btn--whatsapp {
@@ -126,9 +142,9 @@ select {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(244, 241, 236, 0.9);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(228, 223, 214, 0.8);
+  background: rgba(12, 14, 20, 0.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(42, 49, 66, 0.9);
 }
 
 .header__inner {
@@ -146,10 +162,12 @@ select {
 }
 
 .brand__logo {
-  width: 52px;
   height: 52px;
+  width: auto;
+  max-width: 160px;
   object-fit: contain;
-  border-radius: 12px;
+  border-radius: 8px;
+  filter: drop-shadow(0 2px 8px rgba(123, 79, 212, 0.35));
 }
 
 .brand__fallback {
@@ -158,21 +176,33 @@ select {
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  color: #fff;
-  font-weight: 700;
+  background: var(--gradient-brand);
+  color: #0c0e14;
+  font-weight: 800;
   letter-spacing: 0.04em;
 }
 
 .brand__text {
-  display: flex;
-  flex-direction: column;
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .brand__logo {
+    height: 58px;
+    max-width: 200px;
+  }
 }
 
 .brand__name {
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .brand__tagline {
@@ -226,9 +256,10 @@ select {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 85% 15%, rgba(201, 162, 39, 0.18), transparent 35%),
-    radial-gradient(circle at 10% 80%, rgba(30, 58, 95, 0.12), transparent 40%),
-    linear-gradient(180deg, #fff 0%, var(--color-bg) 100%);
+    radial-gradient(circle at 80% 10%, rgba(123, 79, 212, 0.22), transparent 40%),
+    radial-gradient(circle at 15% 85%, rgba(91, 140, 255, 0.15), transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(92, 255, 138, 0.06), transparent 50%),
+    linear-gradient(180deg, var(--color-bg-elevated) 0%, var(--color-bg) 100%);
 }
 
 .hero__content {
@@ -269,8 +300,9 @@ select {
 .hero__stats div {
   padding: 1rem;
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(24, 28, 39, 0.85);
   border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-sm);
 }
 
 .hero__stats dt {
@@ -302,13 +334,9 @@ select {
 .hero__infographic {
   width: 100%;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
   border: 1px solid var(--color-line);
   background: var(--color-surface);
-}
-
-.hero__visual--fallback .hero__infographic {
-  opacity: 0;
 }
 
 .hero__card {
@@ -317,10 +345,11 @@ select {
   bottom: 1rem;
   padding: 1rem 1.1rem;
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(24, 28, 39, 0.95);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--color-line);
   min-width: 180px;
+  backdrop-filter: blur(8px);
 }
 
 .hero__card-label {
@@ -337,6 +366,7 @@ select {
 
 .hero__card--accent {
   border-color: var(--color-accent);
+  box-shadow: var(--shadow-md), 0 0 24px rgba(92, 255, 138, 0.15);
 }
 
 .toolbar {
@@ -374,7 +404,7 @@ select {
 }
 
 .search__input:focus {
-  outline: 2px solid rgba(30, 58, 95, 0.25);
+  outline: 2px solid rgba(123, 79, 212, 0.45);
   border-color: var(--color-primary);
 }
 
@@ -419,8 +449,9 @@ select {
 .pill:hover,
 .pill.is-active {
   color: var(--color-ink);
-  border-color: var(--color-primary);
+  border-color: var(--color-accent);
   background: var(--color-accent-soft);
+  box-shadow: 0 0 16px rgba(92, 255, 138, 0.12);
 }
 
 .catalog {
@@ -471,7 +502,7 @@ select {
 .product-card__media {
   position: relative;
   aspect-ratio: 4 / 3;
-  background: linear-gradient(180deg, #f8f6f2, #ece7df);
+  background: linear-gradient(180deg, #1f2433, #12151d);
   overflow: hidden;
 }
 
@@ -487,10 +518,10 @@ select {
   left: 0.85rem;
   padding: 0.3rem 0.65rem;
   border-radius: 999px;
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--gradient-brand);
+  color: #0c0e14;
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .product-card__body {
@@ -531,7 +562,7 @@ select {
 .product-card__price {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .product-card__code {
@@ -615,10 +646,11 @@ select {
   display: grid;
   place-items: center;
   background: var(--color-accent-soft);
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-weight: 700;
   font-size: 0.85rem;
   flex-shrink: 0;
+  border: 1px solid rgba(92, 255, 138, 0.25);
 }
 
 .contact {
@@ -632,9 +664,12 @@ select {
   gap: 1.5rem;
   padding: 2rem;
   border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background:
+    radial-gradient(circle at 100% 0%, rgba(92, 255, 138, 0.12), transparent 40%),
+    linear-gradient(135deg, #1a1230 0%, var(--color-primary-dark) 45%, #1a2848 100%);
   color: #fff;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  border: 1px solid rgba(123, 79, 212, 0.35);
 }
 
 .contact__card p {
@@ -713,7 +748,7 @@ select {
 
 .modal__image {
   min-height: 280px;
-  background: #ece7df;
+  background: #1f2433;
 }
 
 .modal__image img {

@@ -3,30 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Catálogo de produtos TNJ — itens para venda da empresa." />
-  <meta name="theme-color" content="#1e3a5f" />
-  <title>TNJ | Catálogo de Produtos</title>
+  <meta name="description" content="TNJ 3D — Catálogo de serviços de impressão 3D premium e prototipagem." />
+  <meta name="theme-color" content="#12141a" />
+  <title>TNJ 3D | Catálogo de Impressão 3D</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Exo+2:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+  <link rel="icon" href="assets/logo.png" type="image/png" />
 </head>
 <body>
   <div class="page">
     <header class="header">
       <div class="header__inner container">
-        <a href="#" class="brand" aria-label="TNJ — início">
+        <a href="#" class="brand" aria-label="TNJ 3D — início">
           <img
-            src="assets/logo.svg"
-            alt="Logo TNJ"
+            src="assets/logo.png"
+            alt="TNJ 3D — Serviços de Impressão 3D"
             class="brand__logo"
-            onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
           />
-          <span class="brand__fallback" hidden>TNJ</span>
           <div class="brand__text">
-            <span class="brand__name">TNJ</span>
-            <span class="brand__tagline">Catálogo de Produtos</span>
+            <span class="brand__name">TNJ 3D</span>
+            <span class="brand__tagline">Premium &amp; Prototipagem</span>
           </div>
         </a>
         <nav class="header__actions">
@@ -48,11 +46,11 @@
       <div class="hero__bg" aria-hidden="true"></div>
       <div class="container hero__content">
         <div class="hero__copy">
-          <p class="eyebrow">Bem-vindo ao nosso catálogo</p>
-          <h1>Produtos selecionados para o seu negócio</h1>
+          <p class="eyebrow">Serviços de impressão 3D</p>
+          <h1>Prototipagem premium para o seu projeto</h1>
           <p class="hero__description">
-            Explore nossa linha completa de itens para venda. Filtre por categoria,
-            compare opções e solicite orçamento em poucos cliques.
+            Explore nosso catálogo de peças, miniaturas e serviços de impressão 3D.
+            Filtre por categoria e solicite orçamento personalizado em poucos cliques.
           </p>
           <div class="hero__cta">
             <a href="#catalogo" class="btn btn--primary btn--lg">Explorar produtos</a>
@@ -62,10 +60,9 @@
         </div>
         <div class="hero__visual">
           <img
-            src="assets/infografico.svg"
-            alt="Infográfico TNJ"
+            src="assets/logo.png"
+            alt="TNJ 3D — Impressão 3D Premium"
             class="hero__infographic"
-            onerror="this.closest('.hero__visual').classList.add('hero__visual--fallback');"
           />
           <div class="hero__card hero__card--accent">
             <span class="hero__card-label">Destaque</span>
@@ -129,16 +126,16 @@
     <section class="about" id="sobre">
       <div class="container about__grid">
         <div class="about__content">
-          <p class="eyebrow">Sobre a TNJ</p>
-          <h2>Qualidade e atendimento que você pode confiar</h2>
+          <p class="eyebrow">Sobre a TNJ 3D</p>
+          <h2>Impressão 3D com acabamento profissional</h2>
           <p>
-            Este catálogo reúne os principais itens disponíveis para venda.
-            Personalize os textos, imagens e contatos conforme a identidade da sua empresa.
+            Especialistas em prototipagem e peças personalizadas com alta precisão.
+            Do conceito ao produto final, entregamos qualidade premium em cada impressão.
           </p>
           <ul class="about__list">
-            <li>Produtos organizados por categoria</li>
+            <li>Prototipagem rápida e peças técnicas</li>
+            <li>Miniaturas e objetos personalizados</li>
             <li>Orçamento rápido via WhatsApp</li>
-            <li>Atualização simples dos itens</li>
           </ul>
         </div>
         <div class="about__panel">
@@ -156,22 +153,22 @@
       <div class="container contact__card">
         <div>
           <p class="eyebrow">Contato</p>
-          <h2>Pronto para fazer seu pedido?</h2>
-          <p>Fale com nossa equipe comercial e receba um orçamento personalizado.</p>
+          <h2>Pronto para imprimir seu projeto?</h2>
+          <p>Envie sua ideia e receba um orçamento personalizado da nossa equipe.</p>
         </div>
         <div class="contact__actions">
           <a class="btn btn--whatsapp btn--lg" id="whatsapp-main" href="#" target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.883 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             WhatsApp
           </a>
-          <a class="btn btn--outline btn--lg" id="email-main" href="mailto:contato@tnj.com.br">E-mail</a>
+          <a class="btn btn--outline btn--lg" id="email-main" href="mailto:contato@tnj3d.com.br">E-mail</a>
         </div>
       </div>
     </section>
 
     <footer class="footer">
       <div class="container footer__inner">
-        <p>&copy; <span id="year"></span> TNJ. Todos os direitos reservados.</p>
+        <p>&copy; <span id="year"></span> TNJ 3D. Todos os direitos reservados.</p>
         <p class="footer__note">Catálogo digital — atualize os produtos em <code>js/products.js</code></p>
       </div>
     </footer>
