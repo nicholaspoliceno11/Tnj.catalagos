@@ -236,7 +236,7 @@ const openModal = (productId) => {
             </div>`
           : ""
       }
-      <p>${product.description}</p>
+      <p class="modal__description">${product.description}</p>
       ${
         product.benefit
           ? `<div class="modal__benefit">
