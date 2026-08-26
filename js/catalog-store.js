@@ -32,16 +32,20 @@ const getCatalogUrl = () => {
 
 export { getCatalogUrl };
 
+import { ASSET_VERSION } from "./version.js";
+
 const githubHeaders = (token) => ({
   Authorization: `Bearer ${token}`,
   Accept: "application/vnd.github+json",
   "X-GitHub-Api-Version": "2022-11-28",
+  "User-Agent": "TNJ3D-Catalogo-Admin",
 });
 
 const parseGitHubError = async (response) => {
   try {
     const data = await response.json();
-    return data?.message || `HTTP ${response.status}`;
+    const parts = [data?.message, ...(data?.errors || []).map((item) => item?.message || JSON.stringify(item))].filter(Boolean);
+    return parts.join(" — ") || `HTTP ${response.status}`;
   } catch {
     return `HTTP ${response.status}`;
   }
@@ -295,13 +299,18 @@ const uploadCatalogJson = async (catalog, token) => {
   return response.json();
 };
 
-export const publishToGitHub = async (catalog, token) => {
-  await uploadCatalogJson(stripEmbeddedImages(catalog), token);
+export const publishToGitHub = async (catalog, token, { includeImages = false } = {}) => {
+  let catalogToPublish = stripEmbeddedImages(catalog);
+  let imageErrors = [];
 
-  const { catalog: catalogWithFiles, imageErrors } = await publishImages(catalog, token);
-  await uploadCatalogJson(catalogWithFiles, token);
+  if (includeImages) {
+    const result = await publishImages(catalog, token);
+    catalogToPublish = result.catalog;
+    imageErrors = result.imageErrors;
+  }
 
-  saveCatalog(catalogWithFiles);
+  await uploadCatalogJson(catalogToPublish, token);
+  saveCatalog(catalogToPublish);
   return { imageErrors };
 };
 
@@ -311,17 +320,29 @@ export const testGitHubToken = async (token) => {
     throw new Error("Informe o token GitHub antes de testar.");
   }
 
-  const response = await fetch(
+  const headers = githubHeaders(trimmed);
+
+  const repoResponse = await fetch(
     `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`,
-    { headers: githubHeaders(trimmed) }
+    { headers }
   );
 
-  if (!response.ok) {
-    const detail = await parseGitHubError(response);
-    throw new Error(`Token inválido ou sem acesso ao repositório. ${detail}`);
+  if (!repoResponse.ok) {
+    const detail = await parseGitHubError(repoResponse);
+    throw new Error(`Token sem acesso ao repositório. ${detail}`);
   }
 
-  const repo = await response.json();
+  const contentsResponse = await fetch(
+    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/data/catalog.json`,
+    { headers }
+  );
+
+  if (!contentsResponse.ok) {
+    const detail = await parseGitHubError(contentsResponse);
+    throw new Error(`Token sem permissão Contents no arquivo catalog.json. ${detail}`);
+  }
+
+  const repo = await repoResponse.json();
   return repo.full_name;
 };
 

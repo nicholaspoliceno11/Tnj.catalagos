@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826g";
 import {
   loadCatalog,
   saveCatalog,
@@ -12,12 +12,12 @@ import {
   isProductPublished,
   getCatalogUrl,
   testGitHubToken,
-} from "./catalog-store.js";
+} from "./catalog-store.js?v=20260826g";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js";
+} from "./gestao-sync.js?v=20260826g";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -26,7 +26,7 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js";
+} from "./tags.js?v=20260826g";
 
 const TOKEN_KEY = "tnj3d_github_token";
 const GESTAO_API_KEY = "tnj3d_gestao_api_url";
@@ -951,22 +951,25 @@ const setupAdminEvents = () => {
 
     if (token) {
       try {
-        const { imageErrors } = await publishToGitHub(catalog, token);
+        const includeImages = window.confirm(
+          "Incluir upload de fotos para o GitHub?\n\nOK = com fotos\nCancelar = só dados e preços (recomendado)"
+        );
+        const { imageErrors } = await publishToGitHub(catalog, token, { includeImages });
         if (imageErrors?.length) {
           showAlert(
-            `Catálogo publicado! Produtos já estão no site. ${imageErrors.length} foto(s) não enviada(s) — verifique permissão Contents do token.`,
+            `Catálogo publicado! ${imageErrors.length} foto(s) não enviada(s). Depois rode deploy no Firebase.`,
             "error"
           );
         } else {
           showAlert(
-            "Catálogo publicado no GitHub! Aguarde 1–2 min e atualize o site. Se usar Firebase, rode deploy novamente.",
+            "Catálogo publicado no GitHub! Aguarde 1 min, rode deploy no Firebase e atualize o site.",
             "success"
           );
         }
         updatePublishHint();
         return;
       } catch (error) {
-        showAlert(error.message, "error");
+        showAlert(error.message || "Falha ao publicar no GitHub.", "error");
         return;
       }
     }
