@@ -31,6 +31,7 @@ let appReady = false;
 let uploadedImageData = null;
 let heroUploadedImageData = null;
 let productFilter = "all";
+let productSearchQuery = "";
 let customAudienceTags = [];
 
 const formatPrice = (value) => {
@@ -72,15 +73,56 @@ const clearLoginError = () => {
 
 const isProductActive = (product) => product.active !== false;
 
+const matchesProductSearch = (product, query) => {
+  const term = query.trim().toLowerCase();
+  if (!term) return true;
+
+  const haystack = [
+    product.name,
+    product.code,
+    product.projetoId,
+    product.subtitle,
+    product.category,
+    product.description,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(term);
+};
+
 const getFilteredProducts = () => {
   if (!catalog) return [];
+
+  let list = catalog.products;
+
   if (productFilter === "inactive") {
-    return catalog.products.filter((product) => !isProductActive(product));
+    list = list.filter((product) => !isProductActive(product));
+  } else if (productFilter === "active") {
+    list = list.filter((product) => isProductActive(product));
   }
-  if (productFilter === "active") {
-    return catalog.products.filter((product) => isProductActive(product));
+
+  if (productSearchQuery.trim()) {
+    list = list.filter((product) => matchesProductSearch(product, productSearchQuery));
   }
-  return catalog.products;
+
+  return list;
+};
+
+const updateProductSearchCount = (visibleCount = getFilteredProducts().length) => {
+  const counter = document.getElementById("product-search-count");
+  if (!counter || !catalog) return;
+
+  const total = catalog.products.length;
+  const query = productSearchQuery.trim();
+
+  if (query) {
+    counter.textContent = `${visibleCount} projeto(s) encontrado(s) de ${total}`;
+    return;
+  }
+
+  counter.textContent = `${total} projeto(s)`;
 };
 
 const renderProductsTable = () => {
@@ -95,17 +137,21 @@ const renderProductsTable = () => {
   });
 
   if (!sorted.length) {
+    const hasSearch = Boolean(productSearchQuery.trim());
     tbody.innerHTML = `
       <tr>
         <td colspan="6" class="admin-table__empty">
           ${
-            productFilter === "inactive"
-              ? "Nenhum produto inativo. Clique em <strong>Importar da gestão</strong> para trazer projetos do Empresa_TNJ.3D."
-              : "Nenhum produto encontrado neste filtro."
+            hasSearch
+              ? `Nenhum projeto encontrado para <strong>${productSearchQuery.trim()}</strong>.`
+              : productFilter === "inactive"
+                ? "Nenhum produto inativo. Clique em <strong>Importar da gestão</strong> para trazer projetos do Empresa_TNJ.3D."
+                : "Nenhum produto encontrado neste filtro."
           }
         </td>
       </tr>`;
     updateGestaoSyncHint();
+    updateProductSearchCount(0);
     return;
   }
 
@@ -138,6 +184,7 @@ const renderProductsTable = () => {
     .join("");
 
   updateGestaoSyncHint();
+  updateProductSearchCount(sorted.length);
 };
 
 const updateGestaoSyncHint = () => {
@@ -616,6 +663,11 @@ const setupAdminEvents = () => {
 
   document.querySelectorAll("[data-product-filter]").forEach((button) => {
     button.addEventListener("click", () => setProductFilter(button.dataset.productFilter));
+  });
+
+  document.getElementById("product-search").addEventListener("input", (event) => {
+    productSearchQuery = event.target.value;
+    renderProductsTable();
   });
 
   document.getElementById("product-form").addEventListener("submit", saveProductFromForm);

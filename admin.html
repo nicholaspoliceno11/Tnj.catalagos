@@ -80,6 +80,17 @@
           <button type="button" class="pill" data-product-filter="inactive">Inativos</button>
           <button type="button" class="pill" data-product-filter="active">Ativos</button>
         </div>
+        <div class="admin-product-search">
+          <label class="admin-product-search__label" for="product-search">Pesquisar projeto</label>
+          <input
+            type="search"
+            id="product-search"
+            class="admin-product-search__input"
+            placeholder="Nome, ID ou filamento..."
+            autocomplete="off"
+          />
+          <p class="admin-product-search__count" id="product-search-count"></p>
+        </div>
         <p class="admin-panel__hint" id="gestao-sync-hint"></p>
         <div class="admin-table-wrap">
           <table class="admin-table">
