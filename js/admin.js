@@ -8,6 +8,7 @@ import {
   clearCatalogCache,
   restoreCatalogBackup,
   hasCatalogBackup,
+  getCatalogBackupInfo,
   isProductPublished,
   getCatalogUrl,
 } from "./catalog-store.js";
@@ -225,8 +226,22 @@ const updatePublishHint = async () => {
 
 const updateBackupButton = () => {
   const button = document.getElementById("restore-backup-btn");
-  if (!button) return;
-  button.hidden = !hasCatalogBackup();
+  const hint = document.getElementById("backup-hint");
+  if (!button || !hint) return;
+
+  const info = getCatalogBackupInfo();
+  if (!info) {
+    button.disabled = true;
+    hint.textContent =
+      "Nenhum backup salvo ainda. O backup é criado automaticamente quando você edita ou salva produtos.";
+    return;
+  }
+
+  button.disabled = false;
+  const when = info.savedAt
+    ? new Date(info.savedAt).toLocaleString("pt-BR")
+    : "data desconhecida";
+  hint.textContent = `Backup disponível: ${info.productCount} produto(s), salvo em ${when}.`;
 };
 
 const restoreCatalogFromBackup = () => {

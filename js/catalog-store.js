@@ -1,5 +1,6 @@
 const STORAGE_KEY = "tnj3d_catalog_v1";
 const BACKUP_KEY = "tnj3d_catalog_backup_v1";
+const BACKUP_META_KEY = "tnj3d_catalog_backup_meta_v1";
 const GITHUB_OWNER = "nicholaspoliceno11";
 const GITHUB_REPO = "Tnj.catalagos";
 
@@ -137,13 +138,37 @@ export const loadPublicCatalog = async () => loadCatalog({ useCache: false });
 export const saveCatalog = (catalog) => {
   const current = localStorage.getItem(STORAGE_KEY);
   if (current) {
+    localStorage.setItem(BACKUP_KEY, current);
+    localStorage.setItem(
+      BACKUP_META_KEY,
+      JSON.stringify({
+        savedAt: Date.now(),
+        productCount: JSON.parse(current)?.products?.length || 0,
+      })
+    );
     sessionStorage.setItem(BACKUP_KEY, current);
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeCatalog(catalog)));
 };
 
+export const getCatalogBackupInfo = () => {
+  const backup = localStorage.getItem(BACKUP_KEY) || sessionStorage.getItem(BACKUP_KEY);
+  if (!backup) return null;
+
+  try {
+    const meta = JSON.parse(localStorage.getItem(BACKUP_META_KEY) || "null");
+    const parsed = JSON.parse(backup);
+    return {
+      productCount: meta?.productCount || parsed?.products?.length || 0,
+      savedAt: meta?.savedAt || null,
+    };
+  } catch {
+    return null;
+  }
+};
+
 export const restoreCatalogBackup = () => {
-  const backup = sessionStorage.getItem(BACKUP_KEY);
+  const backup = localStorage.getItem(BACKUP_KEY) || sessionStorage.getItem(BACKUP_KEY);
   if (!backup) return null;
 
   try {
@@ -155,7 +180,8 @@ export const restoreCatalogBackup = () => {
   }
 };
 
-export const hasCatalogBackup = () => Boolean(sessionStorage.getItem(BACKUP_KEY));
+export const hasCatalogBackup = () =>
+  Boolean(localStorage.getItem(BACKUP_KEY) || sessionStorage.getItem(BACKUP_KEY));
 
 export const clearCatalogCache = () => {
   localStorage.removeItem(STORAGE_KEY);
