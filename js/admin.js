@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js?v=20260826n";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826o";
 import {
   loadCatalog,
   saveCatalog,
@@ -15,12 +15,12 @@ import {
   normalizeGitHubToken,
   mergeCatalogPrices,
   fetchServerCatalog,
-} from "./catalog-store.js?v=20260826n";
+} from "./catalog-store.js?v=20260826o";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js?v=20260826n";
+} from "./gestao-sync.js?v=20260826o";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -29,9 +29,9 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js?v=20260826n";
+} from "./tags.js?v=20260826o";
 
-const TOKEN_KEY = "tnj3d_github_token";
+const PUBLIC_SITE_URL = "https://nicholaspoliceno11.github.io/Tnj.catalagos/";
 const GESTAO_API_KEY = "tnj3d_gestao_api_url";
 const GESTAO_AUTO_SYNC_KEY = "tnj3d_gestao_auto_sync";
 
@@ -992,12 +992,12 @@ const setupAdminEvents = () => {
 
         if (imageErrors?.length) {
           showAlert(
-            `Catálogo publicado (${activeCount} ativo(s) de ${productCount})! ${imagesUploaded} foto(s) enviada(s), ${imageErrors.length} falhou(aram). Depois rode deploy no Firebase.`,
+            `Catálogo publicado (${activeCount} ativo(s) de ${productCount})! ${imagesUploaded} foto(s) enviada(s), ${imageErrors.length} falhou(aram). O site atualiza sozinho em 1–2 min em ${PUBLIC_SITE_URL}`,
             "success"
           );
         } else {
           showAlert(
-            `Catálogo publicado (${activeCount} ativo(s) de ${productCount})! ${imagesUploaded} foto(s) enviada(s). Rode deploy no Firebase e atualize o site.`,
+            `Catálogo publicado (${activeCount} ativo(s) de ${productCount})! ${imagesUploaded} foto(s) enviada(s). O site atualiza sozinho em 1–2 min — aguarde e atualize a página (Ctrl+Shift+R).`,
             "success"
           );
         }
