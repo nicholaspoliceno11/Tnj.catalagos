@@ -200,8 +200,11 @@
           </div>
           <label class="admin-form__full admin-form__checkbox">
             <input type="checkbox" id="publish-include-images" />
-            Incluir fotos no GitHub (opcional — pode falhar; dados e preços publicam mesmo assim)
+            Também enviar fotos de produtos <strong>inativos</strong> (opcional)
           </label>
+          <p class="admin-form__hint admin-form__full">
+            Fotos de produtos <strong>ativos</strong> são enviadas automaticamente ao publicar. Depois rode deploy no Firebase.
+          </p>
         </form>
       </section>
     </main>
@@ -227,7 +230,7 @@
         <label class="admin-form__full admin-form__upload">
           Foto do produto
           <input type="file" id="product-image-file" accept="image/png,image/jpeg,image/webp,image/gif" />
-          <span class="admin-form__hint-inline">PNG, JPG ou WEBP — até 5 MB</span>
+          <span class="admin-form__hint-inline">PNG, JPG ou WEBP — até 5 MB. Após salvar, clique em <strong>Publicar catálogo</strong> para enviar a foto ao site.</span>
         </label>
         <div class="admin-form__full product-image-preview" id="product-image-preview" hidden>
           <img id="product-image-preview-img" alt="Pré-visualização da foto" />
@@ -301,6 +304,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="js/admin.js?v=20260826m"></script>
+  <script type="module" src="js/admin.js?v=20260826n"></script>
 </body>
 </html>

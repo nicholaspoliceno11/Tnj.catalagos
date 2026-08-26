@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js?v=20260826m";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826n";
 import {
   loadCatalog,
   saveCatalog,
@@ -15,12 +15,12 @@ import {
   normalizeGitHubToken,
   mergeCatalogPrices,
   fetchServerCatalog,
-} from "./catalog-store.js?v=20260826m";
+} from "./catalog-store.js?v=20260826n";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js?v=20260826m";
+} from "./gestao-sync.js?v=20260826n";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -29,7 +29,7 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js?v=20260826m";
+} from "./tags.js?v=20260826n";
 
 const TOKEN_KEY = "tnj3d_github_token";
 const GESTAO_API_KEY = "tnj3d_gestao_api_url";
@@ -985,19 +985,19 @@ const setupAdminEvents = () => {
 
     if (token) {
       try {
-        const includeImages = document.getElementById("publish-include-images")?.checked === true;
-        const { imageErrors, activeCount, productCount } = await publishToGitHub(catalog, token, {
-          includeImages,
+        const includeInactiveImages = document.getElementById("publish-include-images")?.checked === true;
+        const { imageErrors, activeCount, productCount, imagesUploaded } = await publishToGitHub(catalog, token, {
+          includeInactiveImages,
         });
 
         if (imageErrors?.length) {
           showAlert(
-            `Catálogo publicado (${activeCount} ativo(s) de ${productCount})! ${imageErrors.length} foto(s) não enviada(s). Depois rode deploy no Firebase.`,
+            `Catálogo publicado (${activeCount} ativo(s) de ${productCount})! ${imagesUploaded} foto(s) enviada(s), ${imageErrors.length} falhou(aram). Depois rode deploy no Firebase.`,
             "success"
           );
         } else {
           showAlert(
-            `Catálogo publicado no GitHub (${activeCount} ativo(s) de ${productCount})! Aguarde 1 min, rode deploy no Firebase e atualize o site.`,
+            `Catálogo publicado (${activeCount} ativo(s) de ${productCount})! ${imagesUploaded} foto(s) enviada(s). Rode deploy no Firebase e atualize o site.`,
             "success"
           );
         }
