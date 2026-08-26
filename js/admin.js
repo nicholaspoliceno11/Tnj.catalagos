@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js?v=20260826s";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826t";
 import {
   loadCatalog,
   saveCatalog,
@@ -16,20 +16,20 @@ import {
   mergeCatalogPrices,
   fetchServerCatalog,
   mergeCatalogAnalytics,
-} from "./catalog-store.js?v=20260826s";
+} from "./catalog-store.js?v=20260826t";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js?v=20260826s";
+} from "./gestao-sync.js?v=20260826t";
 import {
   formatProductPrice,
-} from "./listing.js?v=20260826s";
+} from "./listing.js?v=20260826t";
 import {
   fillCategoryDatalist,
   normalizeCatalogCategories,
   resolveCategoryName,
-} from "./categories.js?v=20260826s";
+} from "./categories.js?v=20260826t";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -38,14 +38,14 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js?v=20260826s";
+} from "./tags.js?v=20260826t";
 import {
   fetchServerClicks,
   getMergedClickCounts,
   getTopProductsByClicks,
   loadLocalClicks,
   normalizeClickStats,
-} from "./analytics.js?v=20260826s";
+} from "./analytics.js?v=20260826t";
 
 const TOKEN_KEY = "tnj3d_github_token";
 const PUBLIC_SITE_URL = "https://nicholaspoliceno11.github.io/Tnj.catalagos/";
@@ -890,6 +890,7 @@ const setupAdminEvents = () => {
   document.getElementById("product-form").addEventListener("submit", saveProductFromForm);
   document.getElementById("product-offer-type").addEventListener("change", updateOfferLabelVisibility);
   document.getElementById("product-listing-type").addEventListener("change", updateListingFormVisibility);
+  updateListingFormVisibility();
   document.getElementById("add-custom-tag-btn").addEventListener("click", addCustomAudienceTag);
   document.getElementById("custom-tag-label").addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
