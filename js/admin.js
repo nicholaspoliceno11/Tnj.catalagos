@@ -892,7 +892,7 @@ const setupAdminEvents = () => {
         const { imageErrors } = await publishToGitHub(catalog, token);
         if (imageErrors?.length) {
           showAlert(
-            `Catálogo publicado! ${imageErrors.length} imagem(ns) não enviada(s) — edite e publique de novo. Detalhe: ${imageErrors[0]}`,
+            `Catálogo publicado! Produtos já estão no site. ${imageErrors.length} foto(s) não enviada(s) — verifique permissão Contents do token.`,
             "error"
           );
         } else {

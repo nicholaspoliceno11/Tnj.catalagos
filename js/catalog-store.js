@@ -201,11 +201,21 @@ const publishImages = async (catalog, token) => {
   };
 };
 
-export const publishToGitHub = async (catalog, token) => {
-  const { catalog: catalogWithFiles, imageErrors } = await publishImages(catalog, token);
+const stripEmbeddedImages = (catalog) => ({
+  ...catalog,
+  hero: catalog.hero?.image && isDataImage(catalog.hero.image)
+    ? { ...catalog.hero, image: undefined }
+    : catalog.hero,
+  products: catalog.products.map((product) => ({
+    ...product,
+    image: isDataImage(product.image) ? undefined : product.image,
+  })),
+});
+
+const uploadCatalogJson = async (catalog, token) => {
   const path = "data/catalog.json";
   const apiBase = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
-  const content = encodeBase64(JSON.stringify(catalogWithFiles, null, 2));
+  const content = encodeBase64(JSON.stringify(catalog, null, 2));
 
   let sha;
   const current = await fetch(apiBase, { headers: githubHeaders(token) });
@@ -214,7 +224,8 @@ export const publishToGitHub = async (catalog, token) => {
     const data = await current.json();
     sha = data.sha;
   } else if (current.status !== 404) {
-    throw new Error("Falha ao acessar o repositório no GitHub.");
+    const detail = await parseGitHubError(current);
+    throw new Error(`Falha ao acessar o catálogo no GitHub. ${detail}`);
   }
 
   const response = await fetch(apiBase, {
@@ -235,8 +246,23 @@ export const publishToGitHub = async (catalog, token) => {
     throw new Error(`Não foi possível publicar no GitHub. ${detail}`);
   }
 
+  return response.json();
+};
+
+export const publishToGitHub = async (catalog, token) => {
+  await uploadCatalogJson(stripEmbeddedImages(catalog), token);
+
+  const { catalog: catalogWithFiles, imageErrors } = await publishImages(catalog, token);
+  const hasUploadedImages = catalogWithFiles.products.some(
+    (product, index) => product.image !== catalog.products[index]?.image
+  ) || catalogWithFiles.hero?.image !== catalog.hero?.image;
+
+  if (hasUploadedImages) {
+    await uploadCatalogJson(catalogWithFiles, token);
+  }
+
   saveCatalog(catalogWithFiles);
-  return { result: await response.json(), imageErrors };
+  return { imageErrors };
 };
 
 export const compressImageFile = (file, maxWidth = 1200) =>
