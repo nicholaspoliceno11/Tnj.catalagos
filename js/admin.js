@@ -143,7 +143,7 @@ const renderProductsTable = () => {
         <td colspan="6" class="admin-table__empty">
           ${
             hasSearch
-              ? `Nenhum projeto encontrado para <strong>${productSearchQuery.trim()}</strong>.`
+              ? `Nenhum projeto encontrado para <strong>${escapeHtml(productSearchQuery.trim())}</strong>.`
               : productFilter === "inactive"
                 ? "Nenhum produto inativo. Clique em <strong>Importar da gestão</strong> para trazer projetos do Empresa_TNJ.3D."
                 : "Nenhum produto encontrado neste filtro."
