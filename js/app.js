@@ -1,4 +1,4 @@
-import { loadCatalog } from "./catalog-store.js";
+import { loadPublicCatalog, isProductPublished } from "./catalog-store.js";
 import {
   normalizeAudienceTags,
   getAudienceTagLabel,
@@ -397,9 +397,9 @@ const setupEvents = () => {
 
 const init = async () => {
   try {
-    const catalog = await loadCatalog();
+    const catalog = await loadPublicCatalog();
     company = catalog.company;
-    products = catalog.products.filter((product) => product.active !== false);
+    products = catalog.products.filter(isProductPublished);
     hero = catalog.hero || {};
     defaultCategory = catalog.defaultCategory || "Brinquedos Sensoriais";
     state.category = defaultCategory;

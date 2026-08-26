@@ -2,6 +2,26 @@ const STORAGE_KEY = "tnj3d_catalog_v1";
 const GITHUB_OWNER = "nicholaspoliceno11";
 const GITHUB_REPO = "Tnj.catalagos";
 
+export const isProductPublished = (product) => {
+  if (product.projetoId) {
+    return product.active === true;
+  }
+  return product.active !== false;
+};
+
+export const normalizeCatalog = (catalog) => {
+  if (!catalog?.products) return catalog;
+
+  catalog.products = catalog.products.map((product) => {
+    if (product.projetoId && product.active !== true) {
+      return { ...product, active: false };
+    }
+    return product;
+  });
+
+  return catalog;
+};
+
 const getCatalogUrl = () => {
   const path = window.location.pathname;
   const base = path.endsWith("/") ? path : path.replace(/\/[^/]*$/, "/");
@@ -58,13 +78,15 @@ const getImageExtension = (dataUrl) => {
 
 const dataUrlToBase64 = (dataUrl) => dataUrl.split(",")[1];
 
-export const loadCatalog = async () => {
-  const cached = localStorage.getItem(STORAGE_KEY);
-  if (cached) {
-    try {
-      return JSON.parse(cached);
-    } catch {
-      localStorage.removeItem(STORAGE_KEY);
+export const loadCatalog = async ({ useCache = true } = {}) => {
+  if (useCache) {
+    const cached = localStorage.getItem(STORAGE_KEY);
+    if (cached) {
+      try {
+        return normalizeCatalog(JSON.parse(cached));
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+      }
     }
   }
 
@@ -72,11 +94,13 @@ export const loadCatalog = async () => {
   if (!response.ok) {
     throw new Error("Não foi possível carregar o catálogo.");
   }
-  return response.json();
+  return normalizeCatalog(await response.json());
 };
 
+export const loadPublicCatalog = async () => loadCatalog({ useCache: false });
+
 export const saveCatalog = (catalog) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(catalog));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeCatalog(catalog)));
 };
 
 export const clearCatalogCache = () => {

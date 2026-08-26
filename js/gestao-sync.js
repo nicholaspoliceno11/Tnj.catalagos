@@ -118,10 +118,18 @@ export const syncProjetosToCatalog = (catalog, projetos) => {
     if (existing) {
       if (!existing.projetoId) {
         existing.projetoId = projetoId;
+        if (existing.active !== true) {
+          existing.active = false;
+        }
       }
 
       if (existing.projetoId === projetoId) {
         let changed = false;
+
+        if (existing.active !== true && existing.active !== false) {
+          existing.active = false;
+          changed = true;
+        }
 
         if (name && existing.name !== name) {
           existing.name = name;
