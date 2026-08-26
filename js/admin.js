@@ -423,6 +423,12 @@ const showImagePreview = (src) => {
   preview.hidden = false;
 };
 
+const updateProductPriceHint = (product = null) => {
+  const hint = document.getElementById("product-price-hint");
+  if (!hint) return;
+  hint.hidden = !product?.projetoId;
+};
+
 const openProductModal = (product = null) => {
   editingProductId = product?.id || null;
   resetImagePreview();
@@ -436,6 +442,7 @@ const openProductModal = (product = null) => {
     product?.category || catalog.defaultCategory || "Brinquedos Sensoriais";
   document.getElementById("product-price").value =
     product?.price != null ? product.price : "";
+  updateProductPriceHint(product);
   document.getElementById("product-badge").value = product?.badge || "";
   document.getElementById("product-image").value =
     product?.image && !product.image.startsWith("data:image/") ? product.image : "";
@@ -538,7 +545,7 @@ const runGestaoSync = async ({ silent = false } = {}) => {
     renderProductsTable();
     populateFeaturedProductSelect();
 
-    const message = `${result.total} projeto(s) na gestão. ${result.added} importado(s) como inativo(s), ${result.updated} atualizado(s), ${result.skipped} já existente(s).`;
+    const message = `${result.total} projeto(s) na gestão. ${result.added} importado(s) com preço de venda, ${result.updated} atualizado(s), ${result.skipped} já existente(s).`;
 
     if (result.added > 0) {
       showAlert(`${message} Veja na lista com filtro "Inativos".`);

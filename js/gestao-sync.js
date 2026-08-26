@@ -72,6 +72,28 @@ export const fetchGestaoProjetos = async (apiUrl) => {
 const slugifyProjetoId = (projetoId) =>
   `prj-${String(projetoId).toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
+export const parseGestaoSellingPrice = (value) => {
+  if (value == null || value === "") return null;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+
+  const cleaned = String(value)
+    .replace(/[R$\s]/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
+
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+export const extractProjetoSellingPrice = (projeto) =>
+  parseGestaoSellingPrice(
+    projeto?.precoSugeridoUnit ??
+      projeto?.precoSugerido ??
+      projeto?.precoPeca ??
+      projeto?.precoPorPeca ??
+      projeto?.precoVenda
+  );
+
 export const syncProjetosToCatalog = (catalog, projetos) => {
   const byProjetoId = new Map();
   const byCode = new Map();
@@ -90,15 +112,42 @@ export const syncProjetosToCatalog = (catalog, projetos) => {
     if (!projetoId) continue;
 
     const existing = byProjetoId.get(projetoId) || byCode.get(projetoId);
-    const price = projeto.precoSugeridoUnit ?? projeto.precoSugerido ?? null;
+    const price = extractProjetoSellingPrice(projeto);
     const name = (projeto.nomeObjeto || projetoId).trim();
 
     if (existing) {
-      if (existing.projetoId === projetoId && existing.active === false) {
-        if (price != null) existing.price = price;
-        if (name) existing.name = name;
-        if (projeto.filamento) existing.subtitle = projeto.filamento;
-        updated += 1;
+      if (!existing.projetoId) {
+        existing.projetoId = projetoId;
+      }
+
+      if (existing.projetoId === projetoId) {
+        let changed = false;
+
+        if (name && existing.name !== name) {
+          existing.name = name;
+          changed = true;
+        }
+
+        if (projeto.filamento && existing.subtitle !== projeto.filamento) {
+          existing.subtitle = projeto.filamento;
+          changed = true;
+        }
+
+        if (price != null) {
+          const shouldUpdatePrice =
+            existing.active === false || existing.price == null || existing.price === "";
+
+          if (shouldUpdatePrice && existing.price !== price) {
+            existing.price = price;
+            changed = true;
+          }
+        }
+
+        if (changed) {
+          updated += 1;
+        } else {
+          skipped += 1;
+        }
       } else {
         skipped += 1;
       }

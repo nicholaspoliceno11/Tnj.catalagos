@@ -203,7 +203,13 @@
         <label>Código<input type="text" id="product-code" required /></label>
         <label>Subtítulo<input type="text" id="product-subtitle" /></label>
         <label>Categoria<input type="text" id="product-category" required /></label>
-        <label>Preço (R$)<input type="number" id="product-price" min="0" step="0.01" placeholder="Deixe vazio para 'Sob consulta'" /></label>
+        <label>
+          Preço de venda (R$)
+          <input type="number" id="product-price" min="0" step="0.01" placeholder="Deixe vazio para 'Sob consulta'" />
+          <span class="admin-form__hint-inline" id="product-price-hint" hidden>
+            Valor importado da gestão (Preço/peça). Você pode alterar aqui antes de publicar.
+          </span>
+        </label>
         <label>Badge<input type="text" id="product-badge" placeholder="Ex.: Destaque, Novo" /></label>
         <label class="admin-form__full admin-form__upload">
           Foto do produto
