@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js?v=20260826l";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826m";
 import {
   loadCatalog,
   saveCatalog,
@@ -13,12 +13,14 @@ import {
   getCatalogUrl,
   testGitHubToken,
   normalizeGitHubToken,
-} from "./catalog-store.js?v=20260826l";
+  mergeCatalogPrices,
+  fetchServerCatalog,
+} from "./catalog-store.js?v=20260826m";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js?v=20260826l";
+} from "./gestao-sync.js?v=20260826m";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -27,7 +29,7 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js?v=20260826l";
+} from "./tags.js?v=20260826m";
 
 const TOKEN_KEY = "tnj3d_github_token";
 const GESTAO_API_KEY = "tnj3d_gestao_api_url";
@@ -1026,6 +1028,11 @@ const init = async () => {
 
   try {
     catalog = await loadCatalog();
+    const serverCatalog = await fetchServerCatalog();
+    if (serverCatalog) {
+      mergeCatalogPrices(catalog, serverCatalog);
+      saveCatalog(catalog);
+    }
     appReady = true;
     setupAdminEvents();
 

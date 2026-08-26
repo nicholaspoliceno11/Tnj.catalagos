@@ -6,6 +6,19 @@ const GITHUB_REPO = "Tnj.catalagos";
 const GITHUB_BRANCH = "main";
 const MAX_CATALOG_BYTES = 4_000_000;
 
+const BASELINE_BS_PRICES = {
+  "BS-001": 36,
+  "BS-002": 10.99,
+  "BS-003": 12.99,
+  "BS-004": 14,
+  "BS-005": 18.99,
+  "BS-006": 18.55,
+  "BS-007": 18.99,
+  "BS-008": 18,
+};
+
+const hasCatalogPrice = (price) => price != null && price !== "";
+
 export const isProductPublished = (product) => {
   if (product.projetoId) {
     return product.active === true;
@@ -42,6 +55,44 @@ const getCatalogUrl = () => {
 export { getCatalogUrl };
 
 import { ASSET_VERSION } from "./version.js";
+
+export const fetchServerCatalog = async () => {
+  const response = await fetch(`${getCatalogUrl()}?t=${Date.now()}`);
+  if (!response.ok) return null;
+  return normalizeCatalog(await response.json());
+};
+
+export const mergeCatalogPrices = (catalog, referenceCatalog = null) => {
+  if (!catalog?.products) return catalog;
+
+  const refById = new Map();
+  const refByCode = new Map();
+  (referenceCatalog?.products || []).forEach((product) => {
+    if (product.id) refById.set(product.id, product);
+    if (product.code) refByCode.set(product.code, product);
+  });
+
+  catalog.products = catalog.products.map((product) => {
+    if (hasCatalogPrice(product.price)) return product;
+
+    const reference =
+      refById.get(product.id) ||
+      (product.code ? refByCode.get(product.code) : null);
+
+    if (hasCatalogPrice(reference?.price)) {
+      return { ...product, price: reference.price };
+    }
+
+    const baseline = product.code ? BASELINE_BS_PRICES[product.code] : undefined;
+    if (baseline != null) {
+      return { ...product, price: baseline };
+    }
+
+    return product;
+  });
+
+  return catalog;
+};
 
 const githubHeaders = (token) => ({
   Authorization: `Bearer ${normalizeGitHubToken(token)}`,
@@ -390,7 +441,10 @@ export const publishToGitHub = async (catalog, token, { includeImages = false } 
     );
   }
 
-  let catalogToPublish = stripEmbeddedImages(catalog);
+  let catalogToPublish = mergeCatalogPrices(
+    stripEmbeddedImages(catalog),
+    await fetchServerCatalog()
+  );
   validateCatalogPayload(catalogToPublish);
 
   await uploadCatalogJson(catalogToPublish, trimmedToken);
