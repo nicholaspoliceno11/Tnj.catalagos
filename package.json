@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "deploy": "firebase deploy --only hosting --project tnj-3d-catalogo",
+    "deploy:ci": "firebase deploy --only hosting --project tnj-3d-catalogo --token",
     "login": "firebase login",
     "login:ci": "firebase login:ci --no-localhost",
     "serve": "firebase emulators:start --only hosting --project tnj-3d-catalogo"

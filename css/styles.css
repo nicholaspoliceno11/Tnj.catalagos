@@ -511,9 +511,10 @@ select {
 
 .product-card__media img {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
-  max-height: 280px;
+  max-height: 320px;
   object-fit: contain;
   object-position: center;
 }

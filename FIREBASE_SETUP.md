@@ -2,6 +2,22 @@
 
 Guia para publicar o catálogo no **Firebase Hosting**.
 
+## ⚠️ Deploy no Cloud Shell (comando correto)
+
+Se aparecer **`Error: No currently active project`**, use **sempre** o `--project`:
+
+```bash
+cd Tnj.catalagos
+git pull
+npx firebase-tools deploy --only hosting --project tnj-3d-catalogo --token "COLE_SEU_TOKEN_AQUI"
+```
+
+> O token começa com `1//...` — gere com `npx firebase-tools login:ci --no-localhost`
+
+**Não use** só `firebase deploy` sem `--project tnj-3d-catalogo`.
+
+---
+
 ## URLs
 
 | Item | Endereço |
@@ -123,4 +139,6 @@ Depois do primeiro deploy:
 | `localhost` conexão recusada ao clicar Permitir | Login no Cloud Shell sem `--no-localhost` | Use `npx firebase-tools login:ci --no-localhost` |
 | Assertion failed: no site name or target name | Hosting não ativado ou `site` ausente no `firebase.json` | Ative Hosting no Console + atualize o repositório |
 | Site Not Found em `.web.app` | Nenhum deploy feito ainda | Gere token + adicione `FIREBASE_TOKEN` no GitHub |
+| `No currently active project` | Falta `--project` no deploy | Use `--project tnj-3d-catalogo` no comando |
+| Foto cortada / site desatualizado | Firebase com versão antiga | Rode o deploy acima com `git pull` antes |
 | Deploy falha no GitHub Actions | Secret ausente ou inválido | Recrie o token com `login:ci` e atualize o secret |
