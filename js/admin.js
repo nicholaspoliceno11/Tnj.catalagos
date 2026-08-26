@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js?v=20260826k";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826l";
 import {
   loadCatalog,
   saveCatalog,
@@ -13,12 +13,12 @@ import {
   getCatalogUrl,
   testGitHubToken,
   normalizeGitHubToken,
-} from "./catalog-store.js?v=20260826k";
+} from "./catalog-store.js?v=20260826l";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js?v=20260826k";
+} from "./gestao-sync.js?v=20260826l";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -27,7 +27,7 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js?v=20260826k";
+} from "./tags.js?v=20260826l";
 
 const TOKEN_KEY = "tnj3d_github_token";
 const GESTAO_API_KEY = "tnj3d_gestao_api_url";
