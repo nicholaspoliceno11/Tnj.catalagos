@@ -9,10 +9,10 @@
   },
   "defaultCategory": "Brinquedos Sensoriais",
   "hero": {
-    "eyebrow": "Brinquedos sensoriais em impressão 3D",
-    "title": "Ferramentas de foco, calma e bem-estar",
-    "description": "Catálogo TNJ 3D com brinquedos sensoriais para relaxamento, concentração e autorregulação. Explore cada item, veja os benefícios e solicite orçamento.",
-    "ctaPrimary": "Ver brinquedos sensoriais",
+    "eyebrow": "Projetos em impressão 3D",
+    "title": "Ferramentas de foco, calma e bem-estar e itens para colecionador.",
+    "description": "Catálogo TNJ 3D\nSomos especialistas em impressão 3D com acabamento de qualidade.\nSolicite já seu orçamento.",
+    "ctaPrimary": "Todas",
     "ctaSecondary": "Solicitar orçamento",
     "image": "assets/logo.png",
     "featuredProductId": "bs-001",
@@ -381,7 +381,6 @@
           "color": "#ff9f43"
         }
       ],
-      "image": "assets/produtos/prj-20260730-054.jpg",
       "featured": true,
       "active": true,
       "description": "Boneco Hulk de 24cm feito de filamento PLA resistente e rígido."
@@ -438,7 +437,6 @@
         }
       ],
       "offerType": "promocao",
-      "image": "assets/produtos/prj-20260726-052.jpg",
       "featured": false,
       "active": true,
       "description": "Boneco feito de filamento resistente."
