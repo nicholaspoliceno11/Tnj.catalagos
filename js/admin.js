@@ -6,6 +6,8 @@ import {
   publishToGitHub,
   compressImageFile,
   clearCatalogCache,
+  isProductPublished,
+  getCatalogUrl,
 } from "./catalog-store.js";
 import {
   DEFAULT_GESTAO_API_URL,
@@ -185,6 +187,38 @@ const renderProductsTable = () => {
 
   updateGestaoSyncHint();
   updateProductSearchCount(sorted.length);
+  updatePublishHint();
+};
+
+const updatePublishHint = async () => {
+  const hint = document.getElementById("publish-hint");
+  if (!hint || !catalog) return;
+
+  try {
+    const response = await fetch(`${getCatalogUrl()}?t=${Date.now()}`);
+    if (!response.ok) throw new Error("fetch failed");
+    const published = await response.json();
+    const localActive = catalog.products.filter(isProductPublished).length;
+    const publishedActive = (published.products || []).filter(isProductPublished).length;
+
+    if (localActive !== publishedActive || catalog.products.length !== (published.products || []).length) {
+      hint.hidden = false;
+      hint.innerHTML = `
+        <strong>Alterações ainda não publicadas no site.</strong>
+        Você tem <strong>${localActive} ativo(s)</strong> no painel, mas o site público mostra <strong>${publishedActive}</strong>.
+        Clique em <strong>Publicar catálogo</strong> para enviar ao GitHub e atualizar o site.
+      `;
+    } else {
+      hint.hidden = true;
+      hint.innerHTML = "";
+    }
+  } catch {
+    hint.hidden = false;
+    hint.innerHTML = `
+      <strong>Alterações salvas apenas neste navegador.</strong>
+      Clique em <strong>Publicar catálogo</strong> para atualizar o site público.
+    `;
+  }
 };
 
 const updateGestaoSyncHint = () => {
@@ -591,6 +625,7 @@ const showAdminView = async () => {
     renderProductsTable();
     fillCompanyForm();
     fillHeroForm();
+    updatePublishHint();
   }
 };
 
@@ -855,7 +890,11 @@ const setupAdminEvents = () => {
     if (token) {
       try {
         await publishToGitHub(catalog, token);
-        showAlert("Catálogo publicado no GitHub! O site atualiza em 1–2 minutos.");
+        showAlert(
+          "Catálogo publicado no GitHub! Aguarde 1–2 min e atualize o site. Se usar Firebase, rode deploy novamente.",
+          "success"
+        );
+        updatePublishHint();
         return;
       } catch (error) {
         showAlert(error.message, "error");

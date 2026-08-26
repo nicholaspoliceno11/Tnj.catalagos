@@ -28,6 +28,8 @@ const getCatalogUrl = () => {
   return `${base}data/catalog.json`;
 };
 
+export { getCatalogUrl };
+
 const githubHeaders = (token) => ({
   Authorization: `Bearer ${token}`,
   Accept: "application/vnd.github+json",
