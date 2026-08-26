@@ -69,8 +69,13 @@ export const fetchGestaoProjetos = async (apiUrl) => {
   return parseGestaoResponse(data);
 };
 
-const slugifyProjetoId = (projetoId) =>
-  `prj-${String(projetoId).toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+const slugifyProjetoId = (projetoId) => {
+  const slug = String(projetoId)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug.startsWith("prj-") ? slug : `prj-${slug}`;
+};
 
 export const parseGestaoSellingPrice = (value) => {
   if (value == null || value === "") return null;

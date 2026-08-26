@@ -889,11 +889,18 @@ const setupAdminEvents = () => {
 
     if (token) {
       try {
-        await publishToGitHub(catalog, token);
-        showAlert(
-          "Catálogo publicado no GitHub! Aguarde 1–2 min e atualize o site. Se usar Firebase, rode deploy novamente.",
-          "success"
-        );
+        const { imageErrors } = await publishToGitHub(catalog, token);
+        if (imageErrors?.length) {
+          showAlert(
+            `Catálogo publicado! ${imageErrors.length} imagem(ns) não enviada(s) — edite e publique de novo. Detalhe: ${imageErrors[0]}`,
+            "error"
+          );
+        } else {
+          showAlert(
+            "Catálogo publicado no GitHub! Aguarde 1–2 min e atualize o site. Se usar Firebase, rode deploy novamente.",
+            "success"
+          );
+        }
         updatePublishHint();
         return;
       } catch (error) {

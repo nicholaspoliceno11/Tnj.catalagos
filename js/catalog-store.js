@@ -33,7 +33,17 @@ export { getCatalogUrl };
 const githubHeaders = (token) => ({
   Authorization: `Bearer ${token}`,
   Accept: "application/vnd.github+json",
+  "X-GitHub-Api-Version": "2022-11-28",
 });
+
+const parseGitHubError = async (response) => {
+  try {
+    const data = await response.json();
+    return data?.message || `HTTP ${response.status}`;
+  } catch {
+    return `HTTP ${response.status}`;
+  }
+};
 
 const encodeBase64 = (text) => btoa(unescape(encodeURIComponent(text)));
 
@@ -63,7 +73,8 @@ const uploadGitHubFile = async (token, path, contentBase64, message) => {
   });
 
   if (!response.ok) {
-    throw new Error(`Não foi possível enviar ${path}.`);
+    const detail = await parseGitHubError(response);
+    throw new Error(`Não foi possível enviar ${path}. ${detail}`);
   }
 
   return response.json();
@@ -79,6 +90,27 @@ const getImageExtension = (dataUrl) => {
 };
 
 const dataUrlToBase64 = (dataUrl) => dataUrl.split(",")[1];
+
+const compressDataUrlForPublish = (dataUrl, maxWidth = 900, quality = 0.78) =>
+  new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d");
+      context.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = () => reject(new Error("Não foi possível comprimir a imagem."));
+    img.src = dataUrl;
+  });
 
 export const loadCatalog = async ({ useCache = true } = {}) => {
   if (useCache) {
@@ -121,6 +153,7 @@ export const downloadCatalog = (catalog) => {
 
 const publishImages = async (catalog, token) => {
   const updatedProducts = [];
+  const imageErrors = [];
 
   for (const product of catalog.products) {
     if (!isDataImage(product.image)) {
@@ -128,35 +161,48 @@ const publishImages = async (catalog, token) => {
       continue;
     }
 
-    const extension = getImageExtension(product.image);
-    const filePath = `assets/produtos/${product.id}.${extension}`;
-    await uploadGitHubFile(
-      token,
-      filePath,
-      dataUrlToBase64(product.image),
-      `feat: adicionar imagem do produto ${product.name}`
-    );
-    updatedProducts.push({ ...product, image: filePath });
+    try {
+      const compressed = await compressDataUrlForPublish(product.image);
+      const extension = "jpg";
+      const filePath = `assets/produtos/${product.id}.${extension}`;
+      await uploadGitHubFile(
+        token,
+        filePath,
+        dataUrlToBase64(compressed),
+        `feat: adicionar imagem do produto ${product.name}`
+      );
+      updatedProducts.push({ ...product, image: filePath });
+    } catch (error) {
+      imageErrors.push(`${product.name}: ${error.message}`);
+      updatedProducts.push({ ...product, image: undefined });
+    }
   }
 
   let hero = catalog.hero || {};
   if (hero.image && isDataImage(hero.image)) {
-    const extension = getImageExtension(hero.image);
-    const heroPath = `assets/hero-destaque.${extension}`;
-    await uploadGitHubFile(
-      token,
-      heroPath,
-      dataUrlToBase64(hero.image),
-      "feat: atualizar foto em destaque da página inicial"
-    );
-    hero = { ...hero, image: heroPath };
+    try {
+      const compressed = await compressDataUrlForPublish(hero.image);
+      const heroPath = "assets/hero-destaque.jpg";
+      await uploadGitHubFile(
+        token,
+        heroPath,
+        dataUrlToBase64(compressed),
+        "feat: atualizar foto em destaque da página inicial"
+      );
+      hero = { ...hero, image: heroPath };
+    } catch (error) {
+      imageErrors.push(`Foto em destaque: ${error.message}`);
+    }
   }
 
-  return { ...catalog, hero, products: updatedProducts };
+  return {
+    catalog: { ...catalog, hero, products: updatedProducts },
+    imageErrors,
+  };
 };
 
 export const publishToGitHub = async (catalog, token) => {
-  const catalogWithFiles = await publishImages(catalog, token);
+  const { catalog: catalogWithFiles, imageErrors } = await publishImages(catalog, token);
   const path = "data/catalog.json";
   const apiBase = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
   const content = encodeBase64(JSON.stringify(catalogWithFiles, null, 2));
@@ -185,11 +231,12 @@ export const publishToGitHub = async (catalog, token) => {
   });
 
   if (!response.ok) {
-    throw new Error("Não foi possível publicar no GitHub. Verifique o token de acesso.");
+    const detail = await parseGitHubError(response);
+    throw new Error(`Não foi possível publicar no GitHub. ${detail}`);
   }
 
   saveCatalog(catalogWithFiles);
-  return response.json();
+  return { result: await response.json(), imageErrors };
 };
 
 export const compressImageFile = (file, maxWidth = 1200) =>
