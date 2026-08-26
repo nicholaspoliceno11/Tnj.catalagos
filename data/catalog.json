@@ -5,8 +5,7 @@
     "whatsapp": "5582993091722",
     "whatsapp2": "5582988180771",
     "email": "tnj.3dimpressoes@gmail.com",
-    "whatsappMessage": "Olá! Gostaria de solicitar um orçamento pelo catálogo TNJ 3D.",
-    "customProjectMessage": "Olá! Tenho um projeto personalizado que não está no catálogo TNJ 3D (impressão 3D, decoração ou kit de festa). Gostaria de solicitar um orçamento."
+    "whatsappMessage": "Olá! Gostaria de solicitar um orçamento pelo catálogo TNJ 3D."
   },
   "defaultCategory": "Brinquedos Sensoriais",
   "hero": {
@@ -373,12 +372,18 @@
       "projetoId": "PRJ-20260730-054",
       "name": "Boneco Hulk - 24cm",
       "code": "PRJ-20260730-054",
-      "category": "Brinquedos Sensoriais",
-      "price": 99.7,
-      "active": false,
-      "description": "Projeto PRJ-20260730-054 importado da gestão TNJ 3D. Edite foto, tags e descrição, depois ative para publicar.",
       "subtitle": "Filamento PLA Lilas Silk + Filamento PLA Branco + Filamento PLA Verde + Filamento PLA Preto / novo",
-      "featured": false
+      "category": "Brinquedo de colecionador",
+      "price": 90,
+      "audienceTags": [
+        {
+          "label": "Colecionador",
+          "color": "#ff9f43"
+        }
+      ],
+      "featured": true,
+      "active": true,
+      "description": "Boneco Hulk de 24cm feito de filamento PLA resistente e rígido."
     },
     {
       "id": "prj-20260729-051",
@@ -432,7 +437,6 @@
         }
       ],
       "offerType": "promocao",
-      "image": "assets/produtos/prj-20260726-052.jpg",
       "featured": false,
       "active": true,
       "description": "Boneco feito de filamento resistente."
