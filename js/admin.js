@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js?v=20260826i";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826j";
 import {
   loadCatalog,
   saveCatalog,
@@ -12,12 +12,13 @@ import {
   isProductPublished,
   getCatalogUrl,
   testGitHubToken,
-} from "./catalog-store.js?v=20260826i";
+  normalizeGitHubToken,
+} from "./catalog-store.js?v=20260826j";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js?v=20260826i";
+} from "./gestao-sync.js?v=20260826j";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -26,20 +27,32 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js?v=20260826i";
+} from "./tags.js?v=20260826j";
 
 const TOKEN_KEY = "tnj3d_github_token";
 const GESTAO_API_KEY = "tnj3d_gestao_api_url";
 const GESTAO_AUTO_SYNC_KEY = "tnj3d_gestao_auto_sync";
 
 const getGitHubToken = () => {
-  const inputToken = document.getElementById("github-token")?.value?.trim();
-  const savedToken = sessionStorage.getItem(TOKEN_KEY)?.trim();
+  const inputToken = normalizeGitHubToken(document.getElementById("github-token")?.value);
+  const savedToken = normalizeGitHubToken(sessionStorage.getItem(TOKEN_KEY));
   const token = inputToken || savedToken || "";
   if (token) {
     sessionStorage.setItem(TOKEN_KEY, token);
+    const input = document.getElementById("github-token");
+    if (input && input.value !== token) {
+      input.value = token;
+    }
   }
   return token;
+};
+
+const clearGitHubToken = () => {
+  sessionStorage.removeItem(TOKEN_KEY);
+  const input = document.getElementById("github-token");
+  if (input) {
+    input.value = "";
+  }
 };
 let catalog = null;
 let editingProductId = null;
@@ -905,6 +918,11 @@ const setupAdminEvents = () => {
     } catch (error) {
       showAlert(error.message, "error");
     }
+  });
+
+  document.getElementById("clear-token-btn")?.addEventListener("click", () => {
+    clearGitHubToken();
+    showAlert("Token removido desta sessão. Cole um token novo e teste novamente.");
   });
 
   document.getElementById("save-gestao-btn").addEventListener("click", () => {

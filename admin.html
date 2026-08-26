@@ -184,15 +184,17 @@
             Token <strong>fine-grained</strong>: repositório <strong>nicholaspoliceno11/Tnj.catalagos</strong>,
             permissão <strong>Contents → Read and write</strong>.
             Ou use token <strong>classic</strong> com escopo <strong>repo</strong>.
+            O valor começa com <strong>github_pat_</strong> ou <strong>ghp_</strong> — copie na hora da criação.
             <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener noreferrer">Criar token</a>
           </p>
           <label class="admin-form__full">
             GitHub Token
-            <input type="password" id="github-token" placeholder="ghp_..." autocomplete="off" />
+            <input type="password" id="github-token" placeholder="github_pat_... ou ghp_..." autocomplete="off" spellcheck="false" />
           </label>
           <div class="admin-form__full admin-form__actions">
             <button type="button" class="btn btn--outline" id="save-token-btn">Salvar token nesta sessão</button>
             <button type="button" class="btn btn--ghost" id="test-github-btn">Testar token GitHub</button>
+            <button type="button" class="btn btn--ghost" id="clear-token-btn">Limpar token</button>
           </div>
           <label class="admin-form__full admin-form__checkbox">
             <input type="checkbox" id="publish-include-images" />
@@ -297,6 +299,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="js/admin.js?v=20260826i"></script>
+  <script type="module" src="js/admin.js?v=20260826j"></script>
 </body>
 </html>

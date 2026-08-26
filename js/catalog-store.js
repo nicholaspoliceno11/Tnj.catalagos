@@ -44,11 +44,39 @@ export { getCatalogUrl };
 import { ASSET_VERSION } from "./version.js";
 
 const githubHeaders = (token) => ({
-  Authorization: `Bearer ${token}`,
+  Authorization: `Bearer ${normalizeGitHubToken(token)}`,
   Accept: "application/vnd.github+json",
   "X-GitHub-Api-Version": "2022-11-28",
   "User-Agent": "TNJ3D-Catalogo-Admin",
 });
+
+export const normalizeGitHubToken = (token) =>
+  String(token || "")
+    .trim()
+    .replace(/^Bearer\s+/i, "")
+    .replace(/^token\s+/i, "")
+    .replace(/^["']|["']$/g, "")
+    .replace(/\s+/g, "");
+
+const isLikelyGitHubToken = (token) =>
+  /^(ghp_|gho_|ghu_|ghs_|ghr_|github_pat_)/.test(token);
+
+const formatGitHubTokenError = (status, detail) => {
+  if (status === 401 || /bad credentials/i.test(detail)) {
+    return [
+      "Token inválido ou expirado (Bad credentials).",
+      "Crie um token novo em github.com/settings/tokens, copie o valor completo (começa com ghp_ ou github_pat_)",
+      "cole aqui, clique em Salvar token e teste de novo.",
+      "Se já usou este token em outro lugar ou compartilhou, revogue-o e gere outro.",
+    ].join(" ");
+  }
+
+  if (status === 403) {
+    return `Token sem permissão suficiente. ${detail} Confira Contents → Read and write no repositório nicholaspoliceno11/Tnj.catalagos.`;
+  }
+
+  return detail;
+};
 
 const parseGitHubError = async (response) => {
   try {
@@ -338,9 +366,15 @@ const validateCatalogPayload = (catalog) => {
 };
 
 export const publishToGitHub = async (catalog, token, { includeImages = false } = {}) => {
-  const trimmedToken = token?.trim();
+  const trimmedToken = normalizeGitHubToken(token);
   if (!trimmedToken) {
     throw new Error("Informe e salve o token GitHub em Configurações antes de publicar.");
+  }
+
+  if (!isLikelyGitHubToken(trimmedToken)) {
+    throw new Error(
+      "Token GitHub inválido. Crie um token novo e cole o valor completo (ghp_... ou github_pat_...)."
+    );
   }
 
   let catalogToPublish = stripEmbeddedImages(catalog);
@@ -372,9 +406,15 @@ export const publishToGitHub = async (catalog, token, { includeImages = false } 
 };
 
 export const testGitHubToken = async (token) => {
-  const trimmed = token?.trim();
+  const trimmed = normalizeGitHubToken(token);
   if (!trimmed) {
     throw new Error("Informe o token GitHub antes de testar.");
+  }
+
+  if (!isLikelyGitHubToken(trimmed)) {
+    throw new Error(
+      "O token não parece válido. Ele deve começar com ghp_ (classic) ou github_pat_ (fine-grained). Copie o valor completo ao criar o token."
+    );
   }
 
   const headers = githubHeaders(trimmed);
@@ -386,7 +426,9 @@ export const testGitHubToken = async (token) => {
 
   if (!repoResponse.ok) {
     const detail = await parseGitHubError(repoResponse);
-    throw new Error(`Token sem acesso ao repositório. ${detail}`);
+    throw new Error(
+      formatGitHubTokenError(repoResponse.status, `Token sem acesso ao repositório. ${detail}`)
+    );
   }
 
   const contentsResponse = await fetch(
@@ -396,7 +438,12 @@ export const testGitHubToken = async (token) => {
 
   if (!contentsResponse.ok) {
     const detail = await parseGitHubError(contentsResponse);
-    throw new Error(`Token sem permissão Contents no arquivo catalog.json. ${detail}`);
+    throw new Error(
+      formatGitHubTokenError(
+        contentsResponse.status,
+        `Token sem permissão Contents no arquivo catalog.json. ${detail}`
+      )
+    );
   }
 
   const repo = await repoResponse.json();
