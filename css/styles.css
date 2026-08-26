@@ -714,6 +714,10 @@ select {
   color: var(--color-muted);
 }
 
+.about__cta {
+  margin-top: 1.5rem;
+}
+
 .steps {
   list-style: none;
   margin: 0;

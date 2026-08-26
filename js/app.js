@@ -319,6 +319,10 @@ const setupHero = () => {
 
 const setupContactLinks = () => {
   const message = company.whatsappMessage;
+  const customMessage =
+    company.customProjectMessage ||
+    "Olá! Tenho um projeto personalizado que não está no catálogo TNJ 3D. Gostaria de solicitar um orçamento.";
+
   document.getElementById("whatsapp-main").href = buildWhatsAppLink(message, company.whatsapp);
 
   const secondary = document.getElementById("whatsapp-secondary");
@@ -327,6 +331,16 @@ const setupContactLinks = () => {
     secondary.hidden = false;
   } else {
     secondary.hidden = true;
+  }
+
+  const customProjectLink = buildWhatsAppLink(customMessage, company.whatsapp);
+  document.getElementById("custom-project-btn")?.setAttribute("href", customProjectLink);
+  document.getElementById("custom-project-btn")?.setAttribute("target", "_blank");
+  document.getElementById("custom-project-btn")?.setAttribute("rel", "noopener noreferrer");
+
+  const customProjectContact = document.getElementById("custom-project-contact");
+  if (customProjectContact) {
+    customProjectContact.href = customProjectLink;
   }
 
   document.getElementById("header-cta").href = "#contato";
