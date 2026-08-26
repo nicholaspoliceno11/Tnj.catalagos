@@ -4,7 +4,7 @@ const BACKUP_META_KEY = "tnj3d_catalog_backup_meta_v1";
 const GITHUB_OWNER = "nicholaspoliceno11";
 const GITHUB_REPO = "Tnj.catalagos";
 const GITHUB_BRANCH = "main";
-const MAX_CATALOG_BYTES = 900_000;
+const MAX_CATALOG_BYTES = 4_000_000;
 
 export const isProductPublished = (product) => {
   if (product.projetoId) {
@@ -17,10 +17,17 @@ export const normalizeCatalog = (catalog) => {
   if (!catalog?.products) return catalog;
 
   catalog.products = catalog.products.map((product) => {
-    if (product.projetoId && product.active !== true) {
-      return { ...product, active: false };
+    const normalized = { ...product };
+
+    if (normalized.id) {
+      normalized.id = String(normalized.id).replace(/^prj-prj-/, "prj-");
     }
-    return product;
+
+    if (normalized.projetoId && normalized.active !== true) {
+      normalized.active = false;
+    }
+
+    return normalized;
   });
 
   return catalog;
@@ -222,6 +229,11 @@ const publishImages = async (catalog, token) => {
       continue;
     }
 
+    if (!isProductPublished(product)) {
+      updatedProducts.push({ ...product, image: undefined });
+      continue;
+    }
+
     try {
       const compressed = await compressDataUrlForPublish(product.image);
       const extension = "jpg";
@@ -253,6 +265,7 @@ const publishImages = async (catalog, token) => {
       hero = { ...hero, image: heroPath };
     } catch (error) {
       imageErrors.push(`Foto em destaque: ${error.message}`);
+      hero = { ...hero, image: undefined };
     }
   }
 
@@ -337,14 +350,25 @@ export const publishToGitHub = async (catalog, token, { includeImages = false } 
 
   let imageErrors = [];
   if (includeImages) {
-    const result = await publishImages(catalog, trimmedToken);
-    catalogToPublish = result.catalog;
-    imageErrors = result.imageErrors;
-    await uploadCatalogJson(catalogToPublish, trimmedToken);
+    try {
+      const result = await publishImages(catalog, trimmedToken);
+      catalogToPublish = result.catalog;
+      imageErrors = result.imageErrors;
+
+      try {
+        await uploadCatalogJson(catalogToPublish, trimmedToken);
+      } catch (error) {
+        imageErrors.push(`Catálogo publicado, mas não foi possível salvar os caminhos das fotos: ${error.message}`);
+      }
+    } catch (error) {
+      imageErrors.push(`Catálogo publicado, mas o envio de fotos falhou: ${error.message}`);
+    }
   }
 
   saveCatalog(catalogToPublish);
-  return { imageErrors };
+
+  const activeCount = catalogToPublish.products.filter(isProductPublished).length;
+  return { imageErrors, activeCount, productCount: catalogToPublish.products.length };
 };
 
 export const testGitHubToken = async (token) => {

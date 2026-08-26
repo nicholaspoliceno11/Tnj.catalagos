@@ -73,7 +73,8 @@ const slugifyProjetoId = (projetoId) => {
   const slug = String(projetoId)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/^-+|-+$/g, "")
+    .replace(/^prj-prj-/, "prj-");
   return slug.startsWith("prj-") ? slug : `prj-${slug}`;
 };
 

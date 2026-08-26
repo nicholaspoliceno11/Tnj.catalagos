@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js?v=20260826h";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826i";
 import {
   loadCatalog,
   saveCatalog,
@@ -12,12 +12,12 @@ import {
   isProductPublished,
   getCatalogUrl,
   testGitHubToken,
-} from "./catalog-store.js?v=20260826h";
+} from "./catalog-store.js?v=20260826i";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js?v=20260826h";
+} from "./gestao-sync.js?v=20260826i";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -26,7 +26,7 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js?v=20260826h";
+} from "./tags.js?v=20260826i";
 
 const TOKEN_KEY = "tnj3d_github_token";
 const GESTAO_API_KEY = "tnj3d_gestao_api_url";
@@ -959,18 +959,19 @@ const setupAdminEvents = () => {
 
     if (token) {
       try {
-        const includeImages = window.confirm(
-          "Incluir upload de fotos para o GitHub?\n\nOK = com fotos\nCancelar = só dados e preços (recomendado)"
-        );
-        const { imageErrors } = await publishToGitHub(catalog, token, { includeImages });
+        const includeImages = document.getElementById("publish-include-images")?.checked === true;
+        const { imageErrors, activeCount, productCount } = await publishToGitHub(catalog, token, {
+          includeImages,
+        });
+
         if (imageErrors?.length) {
           showAlert(
-            `Catálogo publicado! ${imageErrors.length} foto(s) não enviada(s). Depois rode deploy no Firebase.`,
-            "error"
+            `Catálogo publicado (${activeCount} ativo(s) de ${productCount})! ${imageErrors.length} foto(s) não enviada(s). Depois rode deploy no Firebase.`,
+            "success"
           );
         } else {
           showAlert(
-            "Catálogo publicado no GitHub! Aguarde 1 min, rode deploy no Firebase e atualize o site.",
+            `Catálogo publicado no GitHub (${activeCount} ativo(s) de ${productCount})! Aguarde 1 min, rode deploy no Firebase e atualize o site.`,
             "success"
           );
         }
