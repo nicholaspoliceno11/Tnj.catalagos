@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js?v=20260826o";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826q";
 import {
   loadCatalog,
   saveCatalog,
@@ -15,12 +15,15 @@ import {
   normalizeGitHubToken,
   mergeCatalogPrices,
   fetchServerCatalog,
-} from "./catalog-store.js?v=20260826o";
+} from "./catalog-store.js?v=20260826q";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js?v=20260826o";
+} from "./gestao-sync.js?v=20260826q";
+import {
+  formatProductPrice,
+} from "./listing.js?v=20260826q";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -29,7 +32,7 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js?v=20260826o";
+} from "./tags.js?v=20260826q";
 
 const PUBLIC_SITE_URL = "https://nicholaspoliceno11.github.io/Tnj.catalagos/";
 const GESTAO_API_KEY = "tnj3d_gestao_api_url";
@@ -193,7 +196,7 @@ const renderProductsTable = () => {
         <td><strong>${product.name}</strong>${product.projetoId ? `<br><span class="admin-table__meta">Gestão: ${product.projetoId}</span>` : ""}</td>
         <td>${product.code}</td>
         <td>${product.category}</td>
-        <td>${formatPrice(product.price)}</td>
+        <td>${formatProductPrice(product, formatPrice)}</td>
         <td>
           <span class="admin-status admin-status--${isProductActive(product) ? "active" : "inactive"}">
             ${isProductActive(product) ? "Ativo" : "Inativo"}
@@ -509,6 +512,21 @@ const updateOfferLabelVisibility = () => {
   wrap.hidden = !offerType;
 };
 
+const updateListingFormVisibility = () => {
+  const listingType = document.getElementById("product-listing-type").value;
+  const rentalWrap = document.getElementById("product-rental-unit-wrap");
+  const priceLabel = document.getElementById("product-price-label");
+
+  if (rentalWrap) {
+    rentalWrap.hidden = listingType !== "aluguel";
+  }
+
+  if (priceLabel) {
+    priceLabel.textContent =
+      listingType === "aluguel" ? "Preço do aluguel (R$)" : "Preço de venda (R$)";
+  }
+};
+
 const resetImagePreview = () => {
   uploadedImageData = null;
   document.getElementById("product-image-file").value = "";
@@ -545,6 +563,9 @@ const openProductModal = (product = null) => {
   document.getElementById("product-subtitle").value = product?.subtitle || "";
   document.getElementById("product-category").value =
     product?.category || catalog.defaultCategory || "Brinquedos Sensoriais";
+  document.getElementById("product-listing-type").value = product?.listingType || "venda";
+  document.getElementById("product-rental-unit").value = product?.rentalUnit || "dia";
+  updateListingFormVisibility();
   document.getElementById("product-price").value =
     product?.price != null ? product.price : "";
   updateProductPriceHint(product);
@@ -576,6 +597,11 @@ const saveProductFromForm = (event) => {
   const audienceTags = getSelectedAudienceTags();
   const offerType = document.getElementById("product-offer-type").value;
   const offerLabel = document.getElementById("product-offer-label").value.trim();
+  const listingType = document.getElementById("product-listing-type").value;
+  const rentalUnit =
+    listingType === "aluguel"
+      ? document.getElementById("product-rental-unit").value
+      : undefined;
 
   const existing = editingProductId
     ? catalog.products.find((item) => item.id === editingProductId)
@@ -588,6 +614,8 @@ const saveProductFromForm = (event) => {
     code: document.getElementById("product-code").value.trim(),
     subtitle: document.getElementById("product-subtitle").value.trim() || undefined,
     category: document.getElementById("product-category").value.trim(),
+    listingType: listingType === "aluguel" ? "aluguel" : undefined,
+    rentalUnit,
     price: priceRaw ? Number(priceRaw) : null,
     badge: document.getElementById("product-badge").value.trim() || undefined,
     audienceTags: audienceTags.length ? audienceTags : undefined,
@@ -787,6 +815,7 @@ const setupAdminEvents = () => {
 
   document.getElementById("product-form").addEventListener("submit", saveProductFromForm);
   document.getElementById("product-offer-type").addEventListener("change", updateOfferLabelVisibility);
+  document.getElementById("product-listing-type").addEventListener("change", updateListingFormVisibility);
   document.getElementById("add-custom-tag-btn").addEventListener("click", addCustomAudienceTag);
   document.getElementById("custom-tag-label").addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
