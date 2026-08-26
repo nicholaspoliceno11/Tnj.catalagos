@@ -61,6 +61,13 @@ export const normalizeGitHubToken = (token) =>
 const isLikelyGitHubToken = (token) =>
   /^(ghp_|gho_|ghu_|ghs_|ghr_|github_pat_)/.test(token);
 
+const WRITE_PERMISSION_MESSAGE = [
+  "Token sem permissão de ESCRITA (Contents → Read and write).",
+  "Ler o repositório funciona, mas publicar exige escrita.",
+  "Em github.com/settings/tokens, edite o token → Repository permissions → Contents → escolha Read and write (não Read-only).",
+  "Salve, cole o token aqui de novo e clique em Testar token GitHub.",
+].join(" ");
+
 const formatGitHubTokenError = (status, detail) => {
   if (status === 401 || /bad credentials/i.test(detail)) {
     return [
@@ -71,8 +78,12 @@ const formatGitHubTokenError = (status, detail) => {
     ].join(" ");
   }
 
-  if (status === 403) {
-    return `Token sem permissão suficiente. ${detail} Confira Contents → Read and write no repositório nicholaspoliceno11/Tnj.catalagos.`;
+  if (
+    status === 403 ||
+    /resource not accessible/i.test(detail) ||
+    /not accessible by personal access token/i.test(detail)
+  ) {
+    return WRITE_PERMISSION_MESSAGE;
   }
 
   return detail;
@@ -126,7 +137,9 @@ const uploadGitHubFile = async (token, path, contentBase64, message) => {
 
   if (!response.ok) {
     const detail = await parseGitHubError(response);
-    throw new Error(`Não foi possível enviar ${path}. ${detail}`);
+    throw new Error(
+      `Não foi possível enviar ${path}. ${formatGitHubTokenError(response.status, detail)}`
+    );
   }
 
   return response.json();
@@ -346,7 +359,7 @@ const uploadCatalogJson = async (catalog, token) => {
 
   if (!response.ok) {
     const detail = await parseGitHubError(response);
-    throw new Error(`Não foi possível publicar no GitHub. ${detail}`);
+    throw new Error(`Não foi possível publicar no GitHub. ${formatGitHubTokenError(response.status, detail)}`);
   }
 
   return response.json();
@@ -405,6 +418,44 @@ export const publishToGitHub = async (catalog, token, { includeImages = false } 
   return { imageErrors, activeCount, productCount: catalogToPublish.products.length };
 };
 
+const verifyGitHubWriteAccess = async (token) => {
+  const path = "data/catalog.json";
+  const apiBase = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
+  const headers = githubHeaders(token);
+
+  const current = await fetch(apiBase, { headers });
+  if (!current.ok) {
+    const detail = await parseGitHubError(current);
+    throw new Error(formatGitHubTokenError(current.status, detail));
+  }
+
+  const file = await current.json();
+  const response = await fetch(apiBase, {
+    method: "PUT",
+    headers: {
+      ...headers,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message: "chore: validar permissão de escrita do painel TNJ 3D",
+      content: file.content,
+      branch: GITHUB_BRANCH,
+      sha: file.sha,
+    }),
+  });
+
+  if (response.ok || response.status === 422) {
+    return true;
+  }
+
+  const detail = await parseGitHubError(response);
+  if (/same|identical|no change/i.test(detail)) {
+    return true;
+  }
+
+  throw new Error(formatGitHubTokenError(response.status, detail));
+};
+
 export const testGitHubToken = async (token) => {
   const trimmed = normalizeGitHubToken(token);
   if (!trimmed) {
@@ -447,12 +498,7 @@ export const testGitHubToken = async (token) => {
   }
 
   const repo = await repoResponse.json();
-
-  if (repo.permissions?.push === false) {
-    throw new Error(
-      "Token sem permissão de escrita. No token fine-grained, use Contents → Read and write no repositório nicholaspoliceno11/Tnj.catalagos."
-    );
-  }
+  await verifyGitHubWriteAccess(trimmed);
 
   return repo.full_name;
 };
