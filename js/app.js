@@ -4,6 +4,11 @@ import {
   getAudienceTagLabel,
   renderAudienceTagChip,
 } from "./tags.js";
+import {
+  formatProductPrice,
+  getListingActionLabel,
+  buildListingQuoteMessage,
+} from "./listing.js";
 
 let company = {};
 let products = [];
@@ -84,10 +89,7 @@ const productImageFallback = (name) => {
   return `https://placehold.co/640x480/181c27/5cff8a?text=${label}`;
 };
 
-const buildQuoteMessage = (product) => {
-  const priceText = product.price != null ? ` — ${formatPrice(product.price)}` : "";
-  return `Olá! Tenho interesse no produto *${product.name}* (${product.code})${priceText}. Poderia me enviar um orçamento?`;
-};
+const buildQuoteMessage = (product) => buildListingQuoteMessage(product, formatPrice);
 
 const renderAudienceTags = (tags = []) => {
   const normalized = normalizeAudienceTags(tags);
@@ -104,6 +106,12 @@ const renderAudienceTags = (tags = []) => {
 };
 
 const renderOfferBadge = (product) => {
+  if (product.listingType === "aluguel") {
+    const unitLabels = { hora: "Aluguel / hora", dia: "Aluguel / dia", kit: "Kit para alugar" };
+    const label = unitLabels[product.rentalUnit] || "Aluguel";
+    return `<span class="product-card__offer product-card__offer--kit">${label}</span>`;
+  }
+
   if (!product.offerType) return "";
 
   const label =
@@ -126,8 +134,8 @@ const renderModalPriceBlock = (product) => {
   return `
     <div class="modal__price-block ${modifier}">
       ${offerBanner}
-      <span class="modal__price-label">Valor</span>
-      <p class="modal__price">${formatPrice(product.price)}</p>
+      <span class="modal__price-label">${product.listingType === "aluguel" ? "Aluguel" : "Valor"}</span>
+      <p class="modal__price">${formatProductPrice(product, formatPrice)}</p>
     </div>
   `;
 };
@@ -137,7 +145,9 @@ const renderProductCard = (product) => {
   const quoteMessage = buildQuoteMessage(product);
   const cardModifier = product.offerType === "promocao" ? " product-card--promocao" : "";
   const priceClass =
-    product.offerType === "promocao"
+    product.listingType === "aluguel"
+      ? "product-card__price product-card__price--rental"
+      : product.offerType === "promocao"
       ? "product-card__price product-card__price--promo"
       : product.offerType === "kit"
         ? "product-card__price product-card__price--kit"
@@ -158,12 +168,12 @@ const renderProductCard = (product) => {
         ${renderAudienceTags(product.audienceTags)}
         <div class="product-card__footer">
           <div>
-            <span class="${priceClass}">${formatPrice(product.price)}</span>
+            <span class="${priceClass}">${formatProductPrice(product, formatPrice)}</span>
             <span class="product-card__code">${product.code}</span>
           </div>
           <div class="product-card__actions">
             <button class="icon-btn js-details" data-id="${product.id}" title="Ver detalhes" aria-label="Ver detalhes de ${product.name}">👁</button>
-            <a class="btn btn--primary btn--sm" href="${buildWhatsAppLink(quoteMessage)}" target="_blank" rel="noopener noreferrer">Orçamento</a>
+            <a class="btn btn--primary btn--sm" href="${buildWhatsAppLink(quoteMessage)}" target="_blank" rel="noopener noreferrer">${getListingActionLabel(product)}</a>
           </div>
         </div>
       </div>
@@ -246,7 +256,7 @@ const openModal = (productId) => {
           : ""
       }
       ${renderModalPriceBlock(product)}
-      <a class="btn btn--whatsapp" href="${buildWhatsAppLink(quoteMessage)}" target="_blank" rel="noopener noreferrer">Solicitar orçamento</a>
+      <a class="btn btn--whatsapp" href="${buildWhatsAppLink(quoteMessage)}" target="_blank" rel="noopener noreferrer">${product.listingType === "aluguel" ? "Solicitar aluguel" : "Solicitar orçamento"}</a>
     </div>
   `;
 
@@ -344,7 +354,13 @@ const setupContactLinks = () => {
   }
 
   document.getElementById("header-cta").href = "#contato";
-  document.getElementById("email-main").href = `mailto:${company.email}`;
+
+  const email = company.email || "tnj.3dimpressoes@gmail.com";
+  const emailButton = document.getElementById("email-main");
+  if (emailButton) {
+    emailButton.href = `mailto:${email}`;
+    emailButton.textContent = email;
+  }
 };
 
 const setupMenu = () => {

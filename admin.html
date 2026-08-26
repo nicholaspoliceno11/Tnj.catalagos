@@ -222,7 +222,22 @@
         <label>Subtítulo<input type="text" id="product-subtitle" /></label>
         <label>Categoria<input type="text" id="product-category" required /></label>
         <label>
-          Preço de venda (R$)
+          Modalidade
+          <select id="product-listing-type">
+            <option value="venda">Vender</option>
+            <option value="aluguel">Alugar</option>
+          </select>
+        </label>
+        <label id="product-rental-unit-wrap" hidden>
+          Unidade do aluguel
+          <select id="product-rental-unit">
+            <option value="hora">Por hora</option>
+            <option value="dia">Por dia</option>
+            <option value="kit">Kit (festa/evento)</option>
+          </select>
+        </label>
+        <label id="product-price-wrap">
+          <span id="product-price-label">Preço de venda (R$)</span>
           <input type="number" id="product-price" min="0" step="0.01" placeholder="Deixe vazio para 'Sob consulta'" />
           <span class="admin-form__hint-inline" id="product-price-hint" hidden>
             Valor importado da gestão (Preço/peça). Você pode alterar aqui antes de publicar.
@@ -306,6 +321,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="js/admin.js?v=20260826o"></script>
+  <script type="module" src="js/admin.js?v=20260826q"></script>
 </body>
 </html>
