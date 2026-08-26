@@ -12,6 +12,15 @@ import {
   fetchGestaoProjetos,
   syncProjetosToCatalog,
 } from "./gestao-sync.js";
+import {
+  PRESET_AUDIENCE_TAGS,
+  normalizeAudienceTags,
+  audienceTagToStorage,
+  getAudienceTagKey,
+  isPresetAudienceTag,
+  escapeHtml,
+  getAudienceTagStyle,
+} from "./tags.js";
 
 const TOKEN_KEY = "tnj3d_github_token";
 const GESTAO_API_KEY = "tnj3d_gestao_api_url";
@@ -22,6 +31,7 @@ let appReady = false;
 let uploadedImageData = null;
 let heroUploadedImageData = null;
 let productFilter = "all";
+let customAudienceTags = [];
 
 const formatPrice = (value) => {
   if (value === null || value === undefined) return "Sob consulta";
@@ -224,15 +234,121 @@ const fillHeroForm = () => {
   }
 };
 
-const getSelectedAudienceTags = () =>
-  [...document.querySelectorAll('input[name="audience-tag"]:checked')].map(
+const getSelectedPresetAudienceKeys = () =>
+  [...document.querySelectorAll('input[name="audience-tag-preset"]:checked')].map(
     (input) => input.value
   );
 
-const setSelectedAudienceTags = (tags = []) => {
-  document.querySelectorAll('input[name="audience-tag"]').forEach((input) => {
-    input.checked = tags.includes(input.value);
+const setSelectedPresetAudienceKeys = (keys = []) => {
+  document.querySelectorAll('input[name="audience-tag-preset"]').forEach((input) => {
+    input.checked = keys.includes(input.value);
   });
+};
+
+const resetCustomTagForm = () => {
+  const labelInput = document.getElementById("custom-tag-label");
+  const colorInput = document.getElementById("custom-tag-color");
+  if (labelInput) labelInput.value = "";
+  if (colorInput) colorInput.value = "#ff9f43";
+};
+
+const renderCustomAudienceTags = () => {
+  const list = document.getElementById("custom-audience-tags");
+  if (!list) return;
+
+  if (!customAudienceTags.length) {
+    list.hidden = true;
+    list.innerHTML = "";
+    return;
+  }
+
+  list.hidden = false;
+  list.innerHTML = customAudienceTags
+    .map(
+      (tag, index) => `
+      <span class="admin-tag-custom__item" style="${getAudienceTagStyle(tag)}">
+        <span>${escapeHtml(tag.label)}</span>
+        <button
+          type="button"
+          class="admin-tag-custom__remove"
+          data-custom-tag-index="${index}"
+          aria-label="Remover tag ${escapeHtml(tag.label)}"
+        >×</button>
+      </span>`
+    )
+    .join("");
+};
+
+const setCustomAudienceTags = (tags = []) => {
+  customAudienceTags = normalizeAudienceTags(tags).filter((tag) => !isPresetAudienceTag(tag));
+  renderCustomAudienceTags();
+};
+
+const addCustomAudienceTag = () => {
+  const labelInput = document.getElementById("custom-tag-label");
+  const colorInput = document.getElementById("custom-tag-color");
+  const label = labelInput?.value.trim() || "";
+  const color = colorInput?.value || "#ff9f43";
+
+  if (!label) {
+    showAlert("Digite o nome da tag personalizada.", "error");
+    labelInput?.focus();
+    return;
+  }
+
+  const nextTag = { label, color };
+  const nextKey = getAudienceTagKey(nextTag);
+  const presetKeys = getSelectedPresetAudienceKeys();
+  const presetConflict = PRESET_AUDIENCE_TAGS.some(
+    (preset) =>
+      preset.key === nextKey.toUpperCase() ||
+      preset.label.toLowerCase() === label.toLowerCase()
+  );
+
+  if (presetConflict) {
+    showAlert("Use as opções em destaque para TDAH, TEA ou Ansiedade.", "error");
+    return;
+  }
+
+  if (
+    customAudienceTags.some((tag) => getAudienceTagKey(tag) === nextKey) ||
+    presetKeys.includes(nextKey.toUpperCase())
+  ) {
+    showAlert("Essa tag já foi adicionada.", "error");
+    return;
+  }
+
+  customAudienceTags.push(nextTag);
+  renderCustomAudienceTags();
+  resetCustomTagForm();
+  labelInput?.focus();
+};
+
+const removeCustomAudienceTag = (index) => {
+  customAudienceTags = customAudienceTags.filter((_, itemIndex) => itemIndex !== index);
+  renderCustomAudienceTags();
+};
+
+const getSelectedAudienceTags = () => {
+  const presetTags = getSelectedPresetAudienceKeys().map((key) => {
+    const preset = PRESET_AUDIENCE_TAGS.find((item) => item.key === key);
+    return audienceTagToStorage(preset);
+  });
+
+  const customTags = customAudienceTags.map((tag) => audienceTagToStorage(tag));
+  return normalizeAudienceTags([...presetTags, ...customTags]).map((tag) =>
+    audienceTagToStorage(tag)
+  );
+};
+
+const setSelectedAudienceTags = (tags = []) => {
+  const normalized = normalizeAudienceTags(tags);
+  const presetKeys = normalized
+    .filter((tag) => isPresetAudienceTag(tag))
+    .map((tag) => tag.key);
+  setSelectedPresetAudienceKeys(presetKeys);
+  setCustomAudienceTags(normalized.filter((tag) => !isPresetAudienceTag(tag)));
+  resetCustomTagForm();
 };
 
 const updateOfferLabelVisibility = () => {
@@ -504,6 +620,18 @@ const setupAdminEvents = () => {
 
   document.getElementById("product-form").addEventListener("submit", saveProductFromForm);
   document.getElementById("product-offer-type").addEventListener("change", updateOfferLabelVisibility);
+  document.getElementById("add-custom-tag-btn").addEventListener("click", addCustomAudienceTag);
+  document.getElementById("custom-tag-label").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addCustomAudienceTag();
+    }
+  });
+  document.getElementById("custom-audience-tags").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-custom-tag-index]");
+    if (!button) return;
+    removeCustomAudienceTag(Number(button.dataset.customTagIndex));
+  });
   document.getElementById("product-image-file").addEventListener("change", async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;

@@ -1,4 +1,9 @@
 import { loadCatalog } from "./catalog-store.js";
+import {
+  normalizeAudienceTags,
+  getAudienceTagLabel,
+  renderAudienceTagChip,
+} from "./tags.js";
 
 let company = {};
 let products = [];
@@ -46,7 +51,7 @@ const filterProducts = () => {
         product.description,
         product.benefit,
         product.category,
-        ...(product.audienceTags || []),
+        ...(product.audienceTags || []).map((tag) => getAudienceTagLabel(tag)),
       ]
         .join(" ")
         .toLowerCase();
@@ -84,21 +89,11 @@ const buildQuoteMessage = (product) => {
   return `Olá! Tenho interesse no produto *${product.name}* (${product.code})${priceText}. Poderia me enviar um orçamento?`;
 };
 
-const AUDIENCE_TAG_LABELS = {
-  TDAH: "TDAH",
-  TEA: "TEA",
-  ANSIEDADE: "Ansiedade",
-};
-
 const renderAudienceTags = (tags = []) => {
-  if (!tags.length) return "";
+  const normalized = normalizeAudienceTags(tags);
+  if (!normalized.length) return "";
 
-  const chips = tags
-    .map(
-      (tag) =>
-        `<span class="product-tag product-tag--${tag.toLowerCase()}">${AUDIENCE_TAG_LABELS[tag] || tag}</span>`
-    )
-    .join("");
+  const chips = normalized.map((tag) => renderAudienceTagChip(tag)).join("");
 
   return `
     <div class="product-card__tags">
@@ -234,11 +229,8 @@ const openModal = (productId) => {
           ? `<div class="modal__audience-tags">
               <span class="product-card__tags-label">Bom para:</span>
               <div class="product-card__tags-list">
-                ${product.audienceTags
-                  .map(
-                    (tag) =>
-                      `<span class="product-tag product-tag--${tag.toLowerCase()}">${AUDIENCE_TAG_LABELS[tag] || tag}</span>`
-                  )
+                ${normalizeAudienceTags(product.audienceTags)
+                  .map((tag) => renderAudienceTagChip(tag))
                   .join("")}
               </div>
             </div>`

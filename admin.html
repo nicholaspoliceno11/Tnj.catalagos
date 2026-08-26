@@ -216,19 +216,35 @@
         <div class="admin-form__full admin-tag-group">
           <span class="admin-tag-group__label">Este item é bom para</span>
           <p class="admin-tag-group__hint">Selecione as condições em que o produto ajuda. As tags aparecem em destaque no catálogo.</p>
-          <div class="admin-tag-group__options" id="audience-tags">
+          <div class="admin-tag-group__options" id="audience-tags-presets">
             <label class="admin-tag-option">
-              <input type="checkbox" name="audience-tag" value="TDAH" />
+              <input type="checkbox" name="audience-tag-preset" value="TDAH" />
               <span class="admin-tag-chip admin-tag-chip--tdah">TDAH</span>
             </label>
             <label class="admin-tag-option">
-              <input type="checkbox" name="audience-tag" value="TEA" />
+              <input type="checkbox" name="audience-tag-preset" value="TEA" />
               <span class="admin-tag-chip admin-tag-chip--tea">TEA</span>
             </label>
             <label class="admin-tag-option">
-              <input type="checkbox" name="audience-tag" value="ANSIEDADE" />
+              <input type="checkbox" name="audience-tag-preset" value="ANSIEDADE" />
               <span class="admin-tag-chip admin-tag-chip--ansiedade">Ansiedade</span>
             </label>
+          </div>
+
+          <div class="admin-tag-custom">
+            <span class="admin-tag-custom__label">Outra tag personalizada</span>
+            <div class="admin-tag-custom__form">
+              <label class="admin-tag-custom__field">
+                <span class="sr-only">Nome da tag</span>
+                <input type="text" id="custom-tag-label" placeholder="Ex.: Foco, Calma, Sensorial..." maxlength="32" />
+              </label>
+              <label class="admin-tag-custom__color" title="Cor da tag">
+                <span class="sr-only">Cor da tag</span>
+                <input type="color" id="custom-tag-color" value="#ff9f43" />
+              </label>
+              <button type="button" class="btn btn--outline btn--sm" id="add-custom-tag-btn">Adicionar tag</button>
+            </div>
+            <div class="admin-tag-custom__list" id="custom-audience-tags" hidden></div>
           </div>
         </div>
 

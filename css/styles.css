@@ -609,6 +609,10 @@ select {
   border-color: rgba(180, 120, 255, 0.35);
 }
 
+.product-tag--custom {
+  border-style: solid;
+}
+
 .product-card__offer {
   position: absolute;
   top: 0.85rem;

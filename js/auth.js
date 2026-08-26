@@ -1,12 +1,26 @@
 const SESSION_KEY = "tnj3d_admin_session";
-const ADMIN_EMAIL = "nicholas.maceio.al@gmail.com";
-const ADMIN_PASSWORD = atob("TmljSDE/b2w=");
+
+const ADMIN_USERS = [
+  {
+    email: "nicholas.maceio.al@gmail.com",
+    password: atob("TmljSDE/b2w="),
+  },
+  {
+    email: "tnj.3dimpressoes@gmail.com",
+    password: atob("VE5KM2RpbXByZXNzZWVz"),
+  },
+];
 
 export const login = async (email, password) => {
   const normalizedEmail = email.trim().toLowerCase();
   const normalizedPassword = password.trim();
 
-  if (normalizedEmail !== ADMIN_EMAIL || normalizedPassword !== ADMIN_PASSWORD) {
+  const admin = ADMIN_USERS.find(
+    (user) =>
+      user.email === normalizedEmail && user.password === normalizedPassword
+  );
+
+  if (!admin) {
     throw new Error("E-mail ou senha incorretos. Verifique e tente novamente.");
   }
 
