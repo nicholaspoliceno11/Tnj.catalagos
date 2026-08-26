@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "tnj-3d-catalogo",
     "public": ".",
     "ignore": [
       "firebase.json",

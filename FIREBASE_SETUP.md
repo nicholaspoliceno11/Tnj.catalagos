@@ -18,6 +18,7 @@ Guia para publicar o catálogo no **Firebase Hosting**.
 1. Acesse [Firebase Console → Hosting](https://console.firebase.google.com/project/tnj-3d-catalogo/hosting)
 2. Clique em **Começar** (se ainda não ativou)
 3. Clique em **Avançar** — não precisa adicionar app Web nem instalar SDK
+4. Confirme que o site **`tnj-3d-catalogo`** aparece na lista (é o site padrão do projeto)
 
 ---
 
@@ -91,9 +92,10 @@ Aguarde 1–2 minutos e acesse: **https://tnj-3d-catalogo.web.app**
 git clone https://github.com/nicholaspoliceno11/Tnj.catalagos.git
 cd Tnj.catalagos
 npm install
-npx firebase-tools login --no-localhost
-npx firebase-tools deploy --only hosting --project tnj-3d-catalogo
+npx firebase-tools deploy --only hosting --project tnj-3d-catalogo --token "COLE_SEU_TOKEN_AQUI"
 ```
+
+> Substitua `COLE_SEU_TOKEN_AQUI` pelo token real (começa com `1//...`). **Não** use o texto literal `SEU_TOKEN_AQUI`.
 
 > No Cloud Shell, sempre use `--no-localhost` no login.
 
@@ -119,5 +121,6 @@ Depois do primeiro deploy:
 |------|-------|---------|
 | `could not determine executable to run` | Comando `npx firebase` errado | Use `npx firebase-tools login:ci` |
 | `localhost` conexão recusada ao clicar Permitir | Login no Cloud Shell sem `--no-localhost` | Use `npx firebase-tools login:ci --no-localhost` |
+| Assertion failed: no site name or target name | Hosting não ativado ou `site` ausente no `firebase.json` | Ative Hosting no Console + atualize o repositório |
 | Site Not Found em `.web.app` | Nenhum deploy feito ainda | Gere token + adicione `FIREBASE_TOKEN` no GitHub |
 | Deploy falha no GitHub Actions | Secret ausente ou inválido | Recrie o token com `login:ci` e atualize o secret |
