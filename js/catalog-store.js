@@ -311,7 +311,7 @@ export const downloadCatalog = (catalog) => {
   URL.revokeObjectURL(url);
 };
 
-const publishImages = async (catalog, token) => {
+const publishImages = async (catalog, token, { includeInactive = false } = {}) => {
   const updatedProducts = [];
   const imageErrors = [];
 
@@ -321,8 +321,8 @@ const publishImages = async (catalog, token) => {
       continue;
     }
 
-    if (!isProductPublished(product)) {
-      updatedProducts.push({ ...product, image: undefined });
+    if (!includeInactive && !isProductPublished(product)) {
+      updatedProducts.push(product);
       continue;
     }
 
@@ -429,7 +429,41 @@ const validateCatalogPayload = (catalog) => {
   return json;
 };
 
-export const publishToGitHub = async (catalog, token, { includeImages = false } = {}) => {
+const mergeUploadedImagePaths = (catalog, uploadResult) => ({
+  ...catalog,
+  hero:
+    uploadResult.hero?.image && !isDataImage(uploadResult.hero.image)
+      ? { ...catalog.hero, image: uploadResult.hero.image }
+      : catalog.hero,
+  products: catalog.products.map((product) => {
+    const uploaded = uploadResult.products.find((item) => item.id === product.id);
+    if (uploaded?.image && !isDataImage(uploaded.image)) {
+      return { ...product, image: uploaded.image };
+    }
+    return product;
+  }),
+});
+
+const applyImagePathsToCatalog = (catalog, uploadResult) => ({
+  ...catalog,
+  hero:
+    uploadResult.hero?.image && !isDataImage(uploadResult.hero.image)
+      ? { ...catalog.hero, image: uploadResult.hero.image }
+      : catalog.hero,
+  products: catalog.products.map((product) => {
+    const uploaded = uploadResult.products.find((item) => item.id === product.id);
+    const image = uploaded?.image;
+    if (image && !isDataImage(image)) {
+      return { ...product, image };
+    }
+    if (isDataImage(product.image)) {
+      return { ...product, image: undefined };
+    }
+    return product;
+  }),
+});
+
+export const publishToGitHub = async (catalog, token, { includeInactiveImages = false } = {}) => {
   const trimmedToken = normalizeGitHubToken(token);
   if (!trimmedToken) {
     throw new Error("Informe e salve o token GitHub em Configurações antes de publicar.");
@@ -450,26 +484,36 @@ export const publishToGitHub = async (catalog, token, { includeImages = false } 
   await uploadCatalogJson(catalogToPublish, trimmedToken);
 
   let imageErrors = [];
-  if (includeImages) {
-    try {
-      const result = await publishImages(catalog, trimmedToken);
-      catalogToPublish = result.catalog;
-      imageErrors = result.imageErrors;
+  let savedCatalog = catalog;
+  let imagesUploaded = 0;
 
+  try {
+    const result = await publishImages(catalog, trimmedToken, {
+      includeInactive: includeInactiveImages,
+    });
+    imageErrors = result.imageErrors;
+    imagesUploaded = result.catalog.products.filter(
+      (product) => product.image && !isDataImage(product.image)
+    ).length;
+
+    catalogToPublish = applyImagePathsToCatalog(catalogToPublish, result.catalog);
+    savedCatalog = mergeUploadedImagePaths(catalog, result.catalog);
+
+    if (imagesUploaded > 0 || (result.catalog.hero?.image && !isDataImage(result.catalog.hero.image))) {
       try {
         await uploadCatalogJson(catalogToPublish, trimmedToken);
       } catch (error) {
         imageErrors.push(`Catálogo publicado, mas não foi possível salvar os caminhos das fotos: ${error.message}`);
       }
-    } catch (error) {
-      imageErrors.push(`Catálogo publicado, mas o envio de fotos falhou: ${error.message}`);
     }
+  } catch (error) {
+    imageErrors.push(`Envio de fotos: ${error.message}`);
   }
 
-  saveCatalog(catalogToPublish);
+  saveCatalog(savedCatalog);
 
   const activeCount = catalogToPublish.products.filter(isProductPublished).length;
-  return { imageErrors, activeCount, productCount: catalogToPublish.products.length };
+  return { imageErrors, activeCount, productCount: catalogToPublish.products.length, imagesUploaded };
 };
 
 const verifyGitHubWriteAccess = async (token) => {
