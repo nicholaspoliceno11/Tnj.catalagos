@@ -19,4 +19,12 @@ jobs:
         run: npm install -g firebase-tools
 
       - name: Deploy to Firebase Hosting
-        run: firebase deploy --only hosting --project tnj-3d-catalogo --token "${{ secrets.FIREBASE_TOKEN }}"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          if [ -z "$FIREBASE_TOKEN" ]; then
+            echo "FIREBASE_TOKEN não configurado no GitHub — deploy Firebase ignorado."
+            echo "O site GitHub Pages atualiza automaticamente em cada publicação."
+            exit 0
+          fi
+          firebase deploy --only hosting --project tnj-3d-catalogo --token "$FIREBASE_TOKEN"

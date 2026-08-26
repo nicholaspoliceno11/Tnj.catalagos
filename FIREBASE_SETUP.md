@@ -1,6 +1,12 @@
 # Firebase — publicar catálogo TNJ 3D
 
-Guia para publicar o catálogo no **Firebase Hosting**.
+> **Não precisa usar Cloud Shell.** Ao clicar em **Publicar catálogo** no admin, o GitHub atualiza o site automaticamente em 1–2 minutos:
+>
+> **https://nicholaspoliceno11.github.io/Tnj.catalagos/**
+>
+> O Firebase abaixo é **opcional** (domínio `.web.app`). Só configure se quiser esse endereço também.
+
+Guia para publicar o catálogo no **Firebase Hosting** (opcional).
 
 ## ⚠️ Deploy no Cloud Shell (comando correto)
 
