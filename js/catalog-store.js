@@ -305,6 +305,26 @@ export const publishToGitHub = async (catalog, token) => {
   return { imageErrors };
 };
 
+export const testGitHubToken = async (token) => {
+  const trimmed = token?.trim();
+  if (!trimmed) {
+    throw new Error("Informe o token GitHub antes de testar.");
+  }
+
+  const response = await fetch(
+    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`,
+    { headers: githubHeaders(trimmed) }
+  );
+
+  if (!response.ok) {
+    const detail = await parseGitHubError(response);
+    throw new Error(`Token inválido ou sem acesso ao repositório. ${detail}`);
+  }
+
+  const repo = await response.json();
+  return repo.full_name;
+};
+
 export const compressImageFile = (file, maxWidth = 1200) =>
   new Promise((resolve, reject) => {
     if (file.size > 5 * 1024 * 1024) {

@@ -181,16 +181,17 @@
         <form id="github-form" class="admin-form admin-form--grid admin-form--section">
           <h2>Publicação no GitHub (opcional)</h2>
           <p class="admin-form__hint">
-            Para que todos os visitantes vejam as alterações, informe um
-            <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer">Personal Access Token</a>
-            com permissão de escrita no repositório. O token fica salvo apenas nesta sessão do navegador.
+            Use um token com acesso ao repositório <strong>nicholaspoliceno11/Tnj.catalagos</strong>
+            e permissão <strong>Contents: Read and write</strong>.
+            <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener noreferrer">Criar token</a>
           </p>
           <label class="admin-form__full">
             GitHub Token
             <input type="password" id="github-token" placeholder="ghp_..." autocomplete="off" />
           </label>
-          <div class="admin-form__full">
+          <div class="admin-form__full admin-form__actions">
             <button type="button" class="btn btn--outline" id="save-token-btn">Salvar token nesta sessão</button>
+            <button type="button" class="btn btn--ghost" id="test-github-btn">Testar token GitHub</button>
           </div>
         </form>
       </section>
@@ -291,6 +292,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="js/admin.js?v=20260826e"></script>
+  <script type="module" src="js/admin.js?v=20260826f"></script>
 </body>
 </html>
