@@ -11,6 +11,7 @@ import {
   getCatalogBackupInfo,
   isProductPublished,
   getCatalogUrl,
+  testGitHubToken,
 } from "./catalog-store.js";
 import {
   DEFAULT_GESTAO_API_URL,
@@ -885,6 +886,17 @@ const setupAdminEvents = () => {
     }
     sessionStorage.setItem(TOKEN_KEY, token);
     showAlert("Token salvo nesta sessão do navegador.");
+  });
+
+  document.getElementById("test-github-btn").addEventListener("click", async () => {
+    const token = document.getElementById("github-token").value.trim();
+    try {
+      const repo = await testGitHubToken(token);
+      sessionStorage.setItem(TOKEN_KEY, token);
+      showAlert(`Token OK! Acesso confirmado ao repositório ${repo}.`);
+    } catch (error) {
+      showAlert(error.message, "error");
+    }
   });
 
   document.getElementById("save-gestao-btn").addEventListener("click", () => {
