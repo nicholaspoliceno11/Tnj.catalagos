@@ -75,6 +75,11 @@
           <button type="button" class="btn btn--primary" id="new-product-btn">+ Novo produto</button>
           <button type="button" class="btn btn--outline" id="sync-gestao-btn">↻ Importar da gestão</button>
         </div>
+        <div class="admin-product-filters">
+          <button type="button" class="pill is-active" data-product-filter="all">Todos</button>
+          <button type="button" class="pill" data-product-filter="inactive">Inativos</button>
+          <button type="button" class="pill" data-product-filter="active">Ativos</button>
+        </div>
         <p class="admin-panel__hint" id="gestao-sync-hint"></p>
         <div class="admin-table-wrap">
           <table class="admin-table">
@@ -155,6 +160,7 @@
           <div class="admin-form__full admin-form__actions">
             <button type="button" class="btn btn--outline" id="save-gestao-btn">Salvar integração</button>
             <button type="button" class="btn btn--ghost" id="test-gestao-btn">Testar conexão</button>
+            <button type="button" class="btn btn--ghost" id="clear-cache-btn">Limpar cache local</button>
           </div>
         </form>
 

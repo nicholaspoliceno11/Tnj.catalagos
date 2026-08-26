@@ -5,6 +5,7 @@ import {
   downloadCatalog,
   publishToGitHub,
   compressImageFile,
+  clearCatalogCache,
 } from "./catalog-store.js";
 import {
   DEFAULT_GESTAO_API_URL,
@@ -20,6 +21,7 @@ let editingProductId = null;
 let appReady = false;
 let uploadedImageData = null;
 let heroUploadedImageData = null;
+let productFilter = "all";
 
 const formatPrice = (value) => {
   if (value === null || value === undefined) return "Sob consulta";
@@ -60,16 +62,42 @@ const clearLoginError = () => {
 
 const isProductActive = (product) => product.active !== false;
 
+const getFilteredProducts = () => {
+  if (!catalog) return [];
+  if (productFilter === "inactive") {
+    return catalog.products.filter((product) => !isProductActive(product));
+  }
+  if (productFilter === "active") {
+    return catalog.products.filter((product) => isProductActive(product));
+  }
+  return catalog.products;
+};
+
 const renderProductsTable = () => {
   const tbody = document.getElementById("products-table");
   if (!tbody || !catalog) return;
 
-  const sorted = [...catalog.products].sort((a, b) => {
+  const sorted = [...getFilteredProducts()].sort((a, b) => {
     const aInactive = !isProductActive(a);
     const bInactive = !isProductActive(b);
     if (aInactive !== bInactive) return aInactive ? -1 : 1;
     return a.name.localeCompare(b.name, "pt-BR");
   });
+
+  if (!sorted.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="admin-table__empty">
+          ${
+            productFilter === "inactive"
+              ? "Nenhum produto inativo. Clique em <strong>Importar da gestão</strong> para trazer projetos do Empresa_TNJ.3D."
+              : "Nenhum produto encontrado neste filtro."
+          }
+        </td>
+      </tr>`;
+    updateGestaoSyncHint();
+    return;
+  }
 
   tbody.innerHTML = sorted
     .map(
@@ -106,10 +134,31 @@ const updateGestaoSyncHint = () => {
   const hint = document.getElementById("gestao-sync-hint");
   if (!hint || !catalog) return;
   const inactive = catalog.products.filter((product) => !isProductActive(product)).length;
-  hint.textContent =
+  const gestaoCount = catalog.products.filter((product) => product.projetoId).length;
+  hint.innerHTML =
     inactive > 0
-      ? `${inactive} produto(s) inativo(s) aguardando revisão antes de publicar no site.`
+      ? `<strong>${inactive} produto(s) inativo(s)</strong> aguardando revisão (${gestaoCount} vindo(s) da gestão). Eles <strong>não aparecem no site público</strong> até você clicar em <strong>Ativar</strong>.`
       : "Todos os produtos estão ativos no catálogo público.";
+};
+
+const setProductFilter = (filter) => {
+  productFilter = filter;
+  document.querySelectorAll("[data-product-filter]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.productFilter === filter);
+  });
+  renderProductsTable();
+};
+
+const focusProductsPanel = () => {
+  document.querySelectorAll(".admin-nav__item").forEach((item) => {
+    item.classList.toggle("is-active", item.dataset.panel === "products");
+  });
+  document.getElementById("products-panel").hidden = false;
+  document.getElementById("hero-panel").hidden = true;
+  document.getElementById("settings-panel").hidden = true;
+  document.getElementById("panel-title").textContent = "Produtos";
+  document.getElementById("panel-subtitle").textContent =
+    "Edite preços, importe da gestão e ative itens para publicar.";
 };
 
 const fillCompanyForm = () => {
@@ -307,7 +356,7 @@ const fillGestaoForm = () => {
 const runGestaoSync = async ({ silent = false } = {}) => {
   const apiUrl = getGestaoApiUrl().trim();
   if (!apiUrl) {
-    if (!silent) showAlert("Configure a URL da API da gestão em Configurações.", "error");
+    showAlert("Configure a URL da API da gestão em Configurações.", "error");
     return null;
   }
 
@@ -321,22 +370,28 @@ const runGestaoSync = async ({ silent = false } = {}) => {
     const projetos = await fetchGestaoProjetos(apiUrl);
     const result = syncProjetosToCatalog(catalog, projetos);
     saveCatalog(catalog);
+    setProductFilter("inactive");
+    focusProductsPanel();
     renderProductsTable();
     populateFeaturedProductSelect();
 
-    if (!silent) {
-      if (result.added || result.updated) {
-        showAlert(
-          `Importação concluída: ${result.added} novo(s) inativo(s), ${result.updated} atualizado(s).`
-        );
-      } else {
-        showAlert("Nenhum projeto novo para importar.");
-      }
+    const message = `${result.total} projeto(s) na gestão. ${result.added} importado(s) como inativo(s), ${result.updated} atualizado(s), ${result.skipped} já existente(s).`;
+
+    if (result.added > 0) {
+      showAlert(`${message} Veja na lista com filtro "Inativos".`);
+    } else if (!silent) {
+      showAlert(message);
+    } else if (result.added === 0 && result.updated === 0) {
+      showAlert(
+        `${result.total} projeto(s) encontrado(s), mas todos já estavam no catálogo. Use o filtro "Inativos" para revisar.`,
+        "error"
+      );
     }
 
     return result;
   } catch (error) {
-    if (!silent) showAlert(error.message, "error");
+    showAlert(error.message, "error");
+    console.error("Erro na importação da gestão:", error);
     return null;
   } finally {
     if (button) {
@@ -442,6 +497,11 @@ const setupAdminEvents = () => {
 
   document.getElementById("new-product-btn").addEventListener("click", () => openProductModal());
   document.getElementById("sync-gestao-btn").addEventListener("click", () => runGestaoSync());
+
+  document.querySelectorAll("[data-product-filter]").forEach((button) => {
+    button.addEventListener("click", () => setProductFilter(button.dataset.productFilter));
+  });
+
   document.getElementById("product-form").addEventListener("submit", saveProductFromForm);
   document.getElementById("product-offer-type").addEventListener("change", updateOfferLabelVisibility);
   document.getElementById("product-image-file").addEventListener("change", async (event) => {
@@ -586,6 +646,14 @@ const setupAdminEvents = () => {
     } catch (error) {
       showAlert(error.message, "error");
     }
+  });
+
+  document.getElementById("clear-cache-btn").addEventListener("click", async () => {
+    clearCatalogCache();
+    catalog = await loadCatalog();
+    renderProductsTable();
+    populateFeaturedProductSelect();
+    showAlert("Cache local limpo. Dados recarregados do arquivo do site.");
   });
 
   document.getElementById("export-btn").addEventListener("click", () => {
