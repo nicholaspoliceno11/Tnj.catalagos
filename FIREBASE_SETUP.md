@@ -7,10 +7,13 @@ Guia para publicar o catálogo no **Firebase Hosting**.
 Se aparecer **`Error: No currently active project`**, use **sempre** o `--project`:
 
 ```bash
+git clone https://github.com/nicholaspoliceno11/Tnj.catalagos.git
 cd Tnj.catalagos
 git pull
 npx firebase-tools deploy --only hosting --project tnj-3d-catalogo --token "COLE_SEU_TOKEN_AQUI"
 ```
+
+> ⚠️ O nome da pasta é **`Tnj.catalagos`** (com **a**), não `Tnj.catalogos`.
 
 > O token começa com `1//...` — gere com `npx firebase-tools login:ci --no-localhost`
 
