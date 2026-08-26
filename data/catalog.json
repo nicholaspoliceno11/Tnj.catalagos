@@ -381,7 +381,6 @@
           "color": "#ff9f43"
         }
       ],
-      "image": "assets/produtos/prj-20260730-054.jpg",
       "featured": true,
       "active": true,
       "description": "Boneco Hulk de 24cm feito de filamento PLA resistente e rígido."
@@ -438,7 +437,6 @@
         }
       ],
       "offerType": "promocao",
-      "image": "assets/produtos/prj-20260726-052.jpg",
       "featured": false,
       "active": true,
       "description": "Boneco feito de filamento resistente."
