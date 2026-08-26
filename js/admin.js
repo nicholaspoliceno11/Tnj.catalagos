@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js?v=20260826j";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826k";
 import {
   loadCatalog,
   saveCatalog,
@@ -13,12 +13,12 @@ import {
   getCatalogUrl,
   testGitHubToken,
   normalizeGitHubToken,
-} from "./catalog-store.js?v=20260826j";
+} from "./catalog-store.js?v=20260826k";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js?v=20260826j";
+} from "./gestao-sync.js?v=20260826k";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -27,7 +27,7 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js?v=20260826j";
+} from "./tags.js?v=20260826k";
 
 const TOKEN_KEY = "tnj3d_github_token";
 const GESTAO_API_KEY = "tnj3d_gestao_api_url";
@@ -225,14 +225,20 @@ const updatePublishHint = async () => {
     const response = await fetch(`${getCatalogUrl()}?t=${Date.now()}`);
     if (!response.ok) throw new Error("fetch failed");
     const published = await response.json();
+    const localTotal = catalog.products.length;
+    const publishedTotal = (published.products || []).length;
     const localActive = catalog.products.filter(isProductPublished).length;
     const publishedActive = (published.products || []).filter(isProductPublished).length;
 
-    if (localActive !== publishedActive || catalog.products.length !== (published.products || []).length) {
+    const totalsDiffer = localTotal !== publishedTotal;
+    const activeDiffer = localActive !== publishedActive;
+
+    if (totalsDiffer || activeDiffer) {
       hint.hidden = false;
       hint.innerHTML = `
         <strong>Alterações ainda não publicadas no site.</strong>
-        Você tem <strong>${localActive} ativo(s)</strong> no painel, mas o site público mostra <strong>${publishedActive}</strong>.
+        Painel: <strong>${localTotal} produto(s)</strong> (${localActive} ativo(s)).
+        Site público: <strong>${publishedTotal} produto(s)</strong> (${publishedActive} ativo(s)).
         Clique em <strong>Publicar catálogo</strong> para enviar ao GitHub e atualizar o site.
       `;
     } else {
