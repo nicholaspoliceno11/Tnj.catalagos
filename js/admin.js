@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js?v=20260826q";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826r";
 import {
   loadCatalog,
   saveCatalog,
@@ -15,15 +15,20 @@ import {
   normalizeGitHubToken,
   mergeCatalogPrices,
   fetchServerCatalog,
-} from "./catalog-store.js?v=20260826q";
+} from "./catalog-store.js?v=20260826r";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js?v=20260826q";
+} from "./gestao-sync.js?v=20260826r";
 import {
   formatProductPrice,
-} from "./listing.js?v=20260826q";
+} from "./listing.js?v=20260826r";
+import {
+  fillCategoryDatalist,
+  normalizeCatalogCategories,
+  resolveCategoryName,
+} from "./categories.js?v=20260826r";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -32,11 +37,17 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js?v=20260826q";
+} from "./tags.js?v=20260826r";
 
+const TOKEN_KEY = "tnj3d_github_token";
 const PUBLIC_SITE_URL = "https://nicholaspoliceno11.github.io/Tnj.catalagos/";
 const GESTAO_API_KEY = "tnj3d_gestao_api_url";
 const GESTAO_AUTO_SYNC_KEY = "tnj3d_gestao_auto_sync";
+
+const refreshCategoryOptions = () => {
+  fillCategoryDatalist("product-category-list", catalog);
+  fillCategoryDatalist("default-category-list", catalog);
+};
 
 const getGitHubToken = () => {
   const inputToken = normalizeGitHubToken(document.getElementById("github-token")?.value);
@@ -335,6 +346,7 @@ const fillCompanyForm = () => {
   document.getElementById("company-email").value = catalog.company.email;
   document.getElementById("company-message").value = catalog.company.whatsappMessage || "";
   document.getElementById("default-category").value = catalog.defaultCategory || "";
+  refreshCategoryOptions();
 };
 
 const populateFeaturedProductSelect = () => {
@@ -563,6 +575,7 @@ const openProductModal = (product = null) => {
   document.getElementById("product-subtitle").value = product?.subtitle || "";
   document.getElementById("product-category").value =
     product?.category || catalog.defaultCategory || "Brinquedos Sensoriais";
+  refreshCategoryOptions();
   document.getElementById("product-listing-type").value = product?.listingType || "venda";
   document.getElementById("product-rental-unit").value = product?.rentalUnit || "dia";
   updateListingFormVisibility();
@@ -613,7 +626,7 @@ const saveProductFromForm = (event) => {
     name: document.getElementById("product-name").value.trim(),
     code: document.getElementById("product-code").value.trim(),
     subtitle: document.getElementById("product-subtitle").value.trim() || undefined,
-    category: document.getElementById("product-category").value.trim(),
+    category: resolveCategoryName(document.getElementById("product-category").value, catalog),
     listingType: listingType === "aluguel" ? "aluguel" : undefined,
     rentalUnit,
     price: priceRaw ? Number(priceRaw) : null,
@@ -639,7 +652,9 @@ const saveProductFromForm = (event) => {
     catalog.products.push(productData);
   }
 
+  normalizeCatalogCategories(catalog);
   saveCatalog(catalog);
+  refreshCategoryOptions();
   renderProductsTable();
   populateFeaturedProductSelect();
   updateBackupButton();
@@ -673,7 +688,9 @@ const runGestaoSync = async ({ silent = false } = {}) => {
   try {
     const projetos = await fetchGestaoProjetos(apiUrl);
     const result = syncProjetosToCatalog(catalog, projetos);
+    normalizeCatalogCategories(catalog);
     saveCatalog(catalog);
+    refreshCategoryOptions();
     setProductFilter("inactive");
     focusProductsPanel();
     renderProductsTable();
@@ -895,8 +912,13 @@ const setupAdminEvents = () => {
       email: document.getElementById("company-email").value.trim(),
       whatsappMessage: document.getElementById("company-message").value.trim(),
     };
-    catalog.defaultCategory = document.getElementById("default-category").value.trim();
+    catalog.defaultCategory = resolveCategoryName(
+      document.getElementById("default-category").value,
+      catalog
+    );
+    normalizeCatalogCategories(catalog);
     saveCatalog(catalog);
+    refreshCategoryOptions();
     showAlert("Configurações salvas localmente.");
   });
 
@@ -1057,6 +1079,8 @@ const init = async () => {
 
   try {
     catalog = await loadCatalog();
+    normalizeCatalogCategories(catalog);
+    saveCatalog(catalog);
     const serverCatalog = await fetchServerCatalog();
     if (serverCatalog) {
       mergeCatalogPrices(catalog, serverCatalog);

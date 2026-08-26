@@ -9,6 +9,7 @@ import {
   getListingActionLabel,
   buildListingQuoteMessage,
 } from "./listing.js";
+import { getCatalogCategories } from "./categories.js";
 
 let company = {};
 let products = [];
@@ -34,16 +35,21 @@ const buildWhatsAppLink = (message, phone = company.whatsapp) => {
   return `https://wa.me/${phone}?text=${text}`;
 };
 
-const getCategories = () =>
-  [...new Set(products.map((product) => product.category))].sort((a, b) =>
-    a.localeCompare(b, "pt-BR")
-  );
+const getCategories = () => getCatalogCategories({ products, defaultCategory });
 
 const filterProducts = () => {
   let list = [...products];
 
   if (state.category !== "all") {
-    list = list.filter((product) => product.category === state.category);
+    list = list.filter((product) => {
+      const key = (value) =>
+        String(value || "")
+          .trim()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/\p{M}/gu, "");
+      return key(product.category) === key(state.category);
+    });
   }
 
   if (state.search.trim()) {

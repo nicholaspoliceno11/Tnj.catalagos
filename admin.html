@@ -148,7 +148,11 @@
           <label>WhatsApp 2 (com DDI)<input type="text" id="company-whatsapp2" placeholder="5582988180771" /></label>
           <label>E-mail<input type="email" id="company-email" required /></label>
           <label class="admin-form__full">Mensagem padrão WhatsApp<textarea id="company-message" rows="3"></textarea></label>
-          <label>Categoria padrão<input type="text" id="default-category" /></label>
+          <label>
+            Categoria padrão
+            <input type="text" id="default-category" list="default-category-list" />
+            <datalist id="default-category-list"></datalist>
+          </label>
           <div class="admin-form__full">
             <button type="submit" class="btn btn--primary">Salvar configurações</button>
           </div>
@@ -220,7 +224,17 @@
         <label>Nome<input type="text" id="product-name" required /></label>
         <label>Código<input type="text" id="product-code" required /></label>
         <label>Subtítulo<input type="text" id="product-subtitle" /></label>
-        <label>Categoria<input type="text" id="product-category" required /></label>
+        <label>
+          Categoria
+          <input
+            type="text"
+            id="product-category"
+            list="product-category-list"
+            required
+            placeholder="Escolha na lista ou digite uma nova"
+          />
+          <datalist id="product-category-list"></datalist>
+        </label>
         <label>
           Modalidade
           <select id="product-listing-type">
@@ -321,6 +335,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="js/admin.js?v=20260826q"></script>
+  <script type="module" src="js/admin.js?v=20260826r"></script>
 </body>
 </html>
