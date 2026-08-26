@@ -381,15 +381,35 @@ const setProductFilter = (filter) => {
 };
 
 const focusProductsPanel = () => {
+  switchAdminPanel("products");
+};
+
+const switchAdminPanel = (panel) => {
   document.querySelectorAll(".admin-nav__item").forEach((item) => {
-    item.classList.toggle("is-active", item.dataset.panel === "products");
+    item.classList.toggle("is-active", item.dataset.panel === panel);
   });
-  document.getElementById("products-panel").hidden = false;
-  document.getElementById("hero-panel").hidden = true;
-  document.getElementById("settings-panel").hidden = true;
-  document.getElementById("panel-title").textContent = "Produtos";
-  document.getElementById("panel-subtitle").textContent =
-    "Edite preços, importe da gestão e ative itens para publicar.";
+
+  document.getElementById("products-panel").hidden = panel !== "products";
+  document.getElementById("hero-panel").hidden = panel !== "hero";
+  document.getElementById("settings-panel").hidden = panel !== "settings";
+
+  const titles = {
+    products: "Produtos",
+    hero: "Página inicial",
+    settings: "Configurações",
+  };
+  const subtitles = {
+    products: "Edite preços, importe da gestão e ative itens para publicar.",
+    hero: "Altere textos, foto em destaque e produto do card.",
+    settings: "Dados da empresa, gestão TNJ 3D e publicação no GitHub.",
+  };
+
+  document.getElementById("panel-title").textContent = titles[panel] || "Admin";
+  document.getElementById("panel-subtitle").textContent = subtitles[panel] || "";
+
+  if (panel === "hero") {
+    fillHeroForm();
+  }
 };
 
 const fillCompanyForm = () => {
@@ -851,27 +871,13 @@ const setupAdminEvents = () => {
 
   document.querySelectorAll(".admin-nav__item").forEach((button) => {
     button.addEventListener("click", () => {
-      document.querySelectorAll(".admin-nav__item").forEach((item) => {
-        item.classList.toggle("is-active", item === button);
-      });
-      const panel = button.dataset.panel;
-      document.getElementById("products-panel").hidden = panel !== "products";
-      document.getElementById("hero-panel").hidden = panel !== "hero";
-      document.getElementById("settings-panel").hidden = panel !== "settings";
+      switchAdminPanel(button.dataset.panel);
+    });
+  });
 
-      const titles = {
-        products: "Produtos",
-        hero: "Página inicial",
-        settings: "Configurações",
-      };
-      const subtitles = {
-        products: "Edite preços, importe da gestão e ative itens para publicar.",
-        hero: "Altere textos, foto em destaque e produto do card.",
-        settings: "Dados da empresa, gestão TNJ 3D e publicação no GitHub.",
-      };
-
-      document.getElementById("panel-title").textContent = titles[panel] || "Admin";
-      document.getElementById("panel-subtitle").textContent = subtitles[panel] || "";
+  document.querySelectorAll("[data-panel-link]").forEach((button) => {
+    button.addEventListener("click", () => {
+      switchAdminPanel(button.dataset.panelLink);
     });
   });
 

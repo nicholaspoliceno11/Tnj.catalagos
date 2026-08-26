@@ -189,6 +189,28 @@
   color: var(--color-ink);
 }
 
+.admin-panel__hint--accent {
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(92, 255, 138, 0.25);
+  background: rgba(92, 255, 138, 0.08);
+}
+
+.admin-link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.admin-link-btn:hover {
+  color: #7dffb0;
+}
+
 .admin-publish-hint {
   margin: 0 0 1rem;
   padding: 0.9rem 1rem;
