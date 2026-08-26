@@ -3,6 +3,8 @@ const BACKUP_KEY = "tnj3d_catalog_backup_v1";
 const BACKUP_META_KEY = "tnj3d_catalog_backup_meta_v1";
 const GITHUB_OWNER = "nicholaspoliceno11";
 const GITHUB_REPO = "Tnj.catalagos";
+const GITHUB_BRANCH = "main";
+const MAX_CATALOG_BYTES = 900_000;
 
 export const isProductPublished = (product) => {
   if (product.projetoId) {
@@ -51,7 +53,15 @@ const parseGitHubError = async (response) => {
   }
 };
 
-const encodeBase64 = (text) => btoa(unescape(encodeURIComponent(text)));
+const encodeBase64 = (text) => {
+  const bytes = new TextEncoder().encode(text);
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let index = 0; index < bytes.length; index += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+  }
+  return btoa(binary);
+};
 
 const uploadGitHubFile = async (token, path, contentBase64, message) => {
   const apiBase = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
@@ -74,7 +84,8 @@ const uploadGitHubFile = async (token, path, contentBase64, message) => {
     body: JSON.stringify({
       message,
       content: contentBase64,
-      sha,
+      branch: GITHUB_BRANCH,
+      ...(sha ? { sha } : {}),
     }),
   });
 
@@ -287,7 +298,8 @@ const uploadCatalogJson = async (catalog, token) => {
     body: JSON.stringify({
       message: "chore: atualizar catálogo via painel admin TNJ 3D",
       content,
-      sha,
+      branch: GITHUB_BRANCH,
+      ...(sha ? { sha } : {}),
     }),
   });
 
@@ -299,17 +311,38 @@ const uploadCatalogJson = async (catalog, token) => {
   return response.json();
 };
 
-export const publishToGitHub = async (catalog, token, { includeImages = false } = {}) => {
-  let catalogToPublish = stripEmbeddedImages(catalog);
-  let imageErrors = [];
+const validateCatalogPayload = (catalog) => {
+  const json = JSON.stringify(catalog, null, 2);
+  const bytes = new TextEncoder().encode(json).length;
 
-  if (includeImages) {
-    const result = await publishImages(catalog, token);
-    catalogToPublish = result.catalog;
-    imageErrors = result.imageErrors;
+  if (bytes > MAX_CATALOG_BYTES) {
+    throw new Error(
+      `Catálogo muito grande (${Math.round(bytes / 1024)} KB). Publique sem fotos (Cancelar na pergunta) ou remova imagens embutidas dos produtos.`
+    );
   }
 
-  await uploadCatalogJson(catalogToPublish, token);
+  return json;
+};
+
+export const publishToGitHub = async (catalog, token, { includeImages = false } = {}) => {
+  const trimmedToken = token?.trim();
+  if (!trimmedToken) {
+    throw new Error("Informe e salve o token GitHub em Configurações antes de publicar.");
+  }
+
+  let catalogToPublish = stripEmbeddedImages(catalog);
+  validateCatalogPayload(catalogToPublish);
+
+  await uploadCatalogJson(catalogToPublish, trimmedToken);
+
+  let imageErrors = [];
+  if (includeImages) {
+    const result = await publishImages(catalog, trimmedToken);
+    catalogToPublish = result.catalog;
+    imageErrors = result.imageErrors;
+    await uploadCatalogJson(catalogToPublish, trimmedToken);
+  }
+
   saveCatalog(catalogToPublish);
   return { imageErrors };
 };
@@ -343,6 +376,13 @@ export const testGitHubToken = async (token) => {
   }
 
   const repo = await repoResponse.json();
+
+  if (repo.permissions?.push === false) {
+    throw new Error(
+      "Token sem permissão de escrita. No token fine-grained, use Contents → Read and write no repositório nicholaspoliceno11/Tnj.catalagos."
+    );
+  }
+
   return repo.full_name;
 };
 

@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js?v=20260826g";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826h";
 import {
   loadCatalog,
   saveCatalog,
@@ -12,12 +12,12 @@ import {
   isProductPublished,
   getCatalogUrl,
   testGitHubToken,
-} from "./catalog-store.js?v=20260826g";
+} from "./catalog-store.js?v=20260826h";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js?v=20260826g";
+} from "./gestao-sync.js?v=20260826h";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -26,11 +26,21 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js?v=20260826g";
+} from "./tags.js?v=20260826h";
 
 const TOKEN_KEY = "tnj3d_github_token";
 const GESTAO_API_KEY = "tnj3d_gestao_api_url";
 const GESTAO_AUTO_SYNC_KEY = "tnj3d_gestao_auto_sync";
+
+const getGitHubToken = () => {
+  const inputToken = document.getElementById("github-token")?.value?.trim();
+  const savedToken = sessionStorage.getItem(TOKEN_KEY)?.trim();
+  const token = inputToken || savedToken || "";
+  if (token) {
+    sessionStorage.setItem(TOKEN_KEY, token);
+  }
+  return token;
+};
 let catalog = null;
 let editingProductId = null;
 let appReady = false;
@@ -879,20 +889,18 @@ const setupAdminEvents = () => {
   });
 
   document.getElementById("save-token-btn").addEventListener("click", () => {
-    const token = document.getElementById("github-token").value.trim();
+    const token = getGitHubToken();
     if (!token) {
       showAlert("Informe um token válido.", "error");
       return;
     }
-    sessionStorage.setItem(TOKEN_KEY, token);
     showAlert("Token salvo nesta sessão do navegador.");
   });
 
   document.getElementById("test-github-btn").addEventListener("click", async () => {
-    const token = document.getElementById("github-token").value.trim();
+    const token = getGitHubToken();
     try {
       const repo = await testGitHubToken(token);
-      sessionStorage.setItem(TOKEN_KEY, token);
       showAlert(`Token OK! Acesso confirmado ao repositório ${repo}.`);
     } catch (error) {
       showAlert(error.message, "error");
@@ -947,7 +955,7 @@ const setupAdminEvents = () => {
 
   document.getElementById("publish-btn").addEventListener("click", async () => {
     saveCatalog(catalog);
-    const token = sessionStorage.getItem(TOKEN_KEY);
+    const token = getGitHubToken();
 
     if (token) {
       try {
