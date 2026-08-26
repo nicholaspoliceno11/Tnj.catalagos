@@ -136,6 +136,23 @@ const fillHeroForm = () => {
   }
 };
 
+const getSelectedAudienceTags = () =>
+  [...document.querySelectorAll('input[name="audience-tag"]:checked')].map(
+    (input) => input.value
+  );
+
+const setSelectedAudienceTags = (tags = []) => {
+  document.querySelectorAll('input[name="audience-tag"]').forEach((input) => {
+    input.checked = tags.includes(input.value);
+  });
+};
+
+const updateOfferLabelVisibility = () => {
+  const offerType = document.getElementById("product-offer-type").value;
+  const wrap = document.getElementById("product-offer-label-wrap");
+  wrap.hidden = !offerType;
+};
+
 const resetImagePreview = () => {
   uploadedImageData = null;
   document.getElementById("product-image-file").value = "";
@@ -167,6 +184,10 @@ const openProductModal = (product = null) => {
   document.getElementById("product-image").value =
     product?.image && !product.image.startsWith("data:image/") ? product.image : "";
   document.getElementById("product-featured").checked = Boolean(product?.featured);
+  setSelectedAudienceTags(product?.audienceTags || []);
+  document.getElementById("product-offer-type").value = product?.offerType || "";
+  document.getElementById("product-offer-label").value = product?.offerLabel || "";
+  updateOfferLabelVisibility();
   document.getElementById("product-description").value = product?.description || "";
   document.getElementById("product-benefit").value = product?.benefit || "";
 
@@ -183,6 +204,10 @@ const openProductModal = (product = null) => {
 const saveProductFromForm = (event) => {
   event.preventDefault();
   const priceRaw = document.getElementById("product-price").value.trim();
+  const audienceTags = getSelectedAudienceTags();
+  const offerType = document.getElementById("product-offer-type").value;
+  const offerLabel = document.getElementById("product-offer-label").value.trim();
+
   const productData = {
     id: editingProductId || `item-${Date.now()}`,
     name: document.getElementById("product-name").value.trim(),
@@ -191,6 +216,9 @@ const saveProductFromForm = (event) => {
     category: document.getElementById("product-category").value.trim(),
     price: priceRaw ? Number(priceRaw) : null,
     badge: document.getElementById("product-badge").value.trim() || undefined,
+    audienceTags: audienceTags.length ? audienceTags : undefined,
+    offerType: offerType || undefined,
+    offerLabel: offerType && offerLabel ? offerLabel : undefined,
     image:
       uploadedImageData ||
       document.getElementById("product-image").value.trim() ||
@@ -304,6 +332,7 @@ const setupAdminEvents = () => {
 
   document.getElementById("new-product-btn").addEventListener("click", () => openProductModal());
   document.getElementById("product-form").addEventListener("submit", saveProductFromForm);
+  document.getElementById("product-offer-type").addEventListener("change", updateOfferLabelVisibility);
   document.getElementById("product-image-file").addEventListener("change", async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;

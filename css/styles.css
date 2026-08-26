@@ -554,10 +554,80 @@ select {
 }
 
 .product-card__description {
-  margin: 0 0 1rem;
+  margin: 0 0 0.75rem;
   color: var(--color-muted);
   font-size: 0.92rem;
   flex: 1;
+}
+
+.product-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 1rem;
+}
+
+.product-card__tags-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.product-card__tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.product-tag {
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 1px solid transparent;
+}
+
+.product-tag--tdah {
+  background: rgba(92, 255, 138, 0.12);
+  color: #5cff8a;
+  border-color: rgba(92, 255, 138, 0.35);
+}
+
+.product-tag--tea {
+  background: rgba(92, 168, 255, 0.12);
+  color: #5ca8ff;
+  border-color: rgba(92, 168, 255, 0.35);
+}
+
+.product-tag--ansiedade {
+  background: rgba(180, 120, 255, 0.12);
+  color: #c49bff;
+  border-color: rgba(180, 120, 255, 0.35);
+}
+
+.product-card__offer {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  z-index: 1;
+}
+
+.product-card__offer--promocao {
+  background: linear-gradient(135deg, #ff6b6b, #ff9f43);
+  color: #1a0f0f;
+}
+
+.product-card__offer--kit {
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  color: #fff;
 }
 
 .product-card__footer {
@@ -823,6 +893,24 @@ select {
   background: var(--color-accent-soft);
   font-size: 0.78rem;
   font-weight: 600;
+}
+
+.tag--promocao {
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff8a8a;
+}
+
+.tag--kit {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c49bff;
+}
+
+.modal__audience-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 @media (max-width: 960px) {
