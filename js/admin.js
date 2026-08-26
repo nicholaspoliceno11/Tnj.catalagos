@@ -161,9 +161,14 @@ const resetImagePreview = () => {
 };
 
 const showImagePreview = (src) => {
+  if (!src) {
+    resetImagePreview();
+    return;
+  }
   const preview = document.getElementById("product-image-preview");
   const image = document.getElementById("product-image-preview-img");
   image.src = src;
+  image.onerror = () => resetImagePreview();
   preview.hidden = false;
 };
 
