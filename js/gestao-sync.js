@@ -1,3 +1,5 @@
+import { resolveCategoryName } from "./categories.js";
+
 export const DEFAULT_GESTAO_API_URL =
   "https://script.google.com/macros/s/AKfycbw0ExZh2Y-TEl9UU1mvaAiUDhKDoHlKlaE0hOPwTeUcvnm6_NXkgLX9dT5Qzjs7ZvoJpQ/exec";
 
@@ -173,7 +175,7 @@ export const syncProjetosToCatalog = (catalog, projetos) => {
       projetoId,
       name,
       code: projetoId,
-      category: catalog.defaultCategory || "Impressão 3D",
+      category: resolveCategoryName(catalog.defaultCategory || "Impressão 3D", catalog),
       price,
       active: false,
       description: `Projeto ${projetoId} importado da gestão TNJ 3D. Edite foto, tags e descrição, depois ative para publicar.`,
