@@ -16,7 +16,8 @@
     "ctaSecondary": "Solicitar orçamento",
     "image": "assets/logo.png",
     "featuredProductId": "bs-001",
-    "featuredLabel": "Destaque"
+    "featuredLabel": "Destaque",
+    "useProductImage": true
   },
   "products": [
     {
@@ -428,7 +429,7 @@
       "name": "Boneco Ciclope",
       "code": "PRJ-20260726-052",
       "subtitle": "Filamento PLA Preto / novo + Filamento PLA Azul + Filamento PLA Amarelo + Filamento PLA Marrom + Filamento PLA Vermelho + Filamento PLA Bege",
-      "category": "Brinquedo de Colecionador",
+      "category": "Brinquedo de colecionador",
       "price": 70.95,
       "badge": "Novo",
       "audienceTags": [
@@ -995,5 +996,9 @@
       "subtitle": "Filamento PLA - Azul Ciano",
       "featured": false
     }
-  ]
+  ],
+  "analytics": {
+    "clicks": {},
+    "updatedAt": "2026-08-26T03:29:10.750Z"
+  }
 }
