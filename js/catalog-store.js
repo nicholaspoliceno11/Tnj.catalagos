@@ -1,4 +1,5 @@
 const STORAGE_KEY = "tnj3d_catalog_v1";
+const BACKUP_KEY = "tnj3d_catalog_backup_v1";
 const GITHUB_OWNER = "nicholaspoliceno11";
 const GITHUB_REPO = "Tnj.catalagos";
 
@@ -134,8 +135,27 @@ export const loadCatalog = async ({ useCache = true } = {}) => {
 export const loadPublicCatalog = async () => loadCatalog({ useCache: false });
 
 export const saveCatalog = (catalog) => {
+  const current = localStorage.getItem(STORAGE_KEY);
+  if (current) {
+    sessionStorage.setItem(BACKUP_KEY, current);
+  }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeCatalog(catalog)));
 };
+
+export const restoreCatalogBackup = () => {
+  const backup = sessionStorage.getItem(BACKUP_KEY);
+  if (!backup) return null;
+
+  try {
+    const parsed = normalizeCatalog(JSON.parse(backup));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+export const hasCatalogBackup = () => Boolean(sessionStorage.getItem(BACKUP_KEY));
 
 export const clearCatalogCache = () => {
   localStorage.removeItem(STORAGE_KEY);
@@ -253,13 +273,7 @@ export const publishToGitHub = async (catalog, token) => {
   await uploadCatalogJson(stripEmbeddedImages(catalog), token);
 
   const { catalog: catalogWithFiles, imageErrors } = await publishImages(catalog, token);
-  const hasUploadedImages = catalogWithFiles.products.some(
-    (product, index) => product.image !== catalog.products[index]?.image
-  ) || catalogWithFiles.hero?.image !== catalog.hero?.image;
-
-  if (hasUploadedImages) {
-    await uploadCatalogJson(catalogWithFiles, token);
-  }
+  await uploadCatalogJson(catalogWithFiles, token);
 
   saveCatalog(catalogWithFiles);
   return { imageErrors };

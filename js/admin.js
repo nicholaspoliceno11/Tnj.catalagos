@@ -6,6 +6,8 @@ import {
   publishToGitHub,
   compressImageFile,
   clearCatalogCache,
+  restoreCatalogBackup,
+  hasCatalogBackup,
   isProductPublished,
   getCatalogUrl,
 } from "./catalog-store.js";
@@ -219,6 +221,28 @@ const updatePublishHint = async () => {
       Clique em <strong>Publicar catálogo</strong> para atualizar o site público.
     `;
   }
+};
+
+const updateBackupButton = () => {
+  const button = document.getElementById("restore-backup-btn");
+  if (!button) return;
+  button.hidden = !hasCatalogBackup();
+};
+
+const restoreCatalogFromBackup = () => {
+  const restored = restoreCatalogBackup();
+  if (!restored) {
+    showAlert("Nenhum backup encontrado nesta sessão.", "error");
+    return;
+  }
+
+  catalog = restored;
+  saveCatalog(catalog);
+  renderProductsTable();
+  populateFeaturedProductSelect();
+  updatePublishHint();
+  updateBackupButton();
+  showAlert(`Backup restaurado com ${catalog.products.length} produto(s).`);
 };
 
 const updateGestaoSyncHint = () => {
@@ -543,6 +567,7 @@ const saveProductFromForm = (event) => {
   saveCatalog(catalog);
   renderProductsTable();
   populateFeaturedProductSelect();
+  updateBackupButton();
   document.getElementById("admin-product-modal").close();
   showAlert("Produto salvo localmente. Clique em Publicar catálogo para atualizar o site.");
 };
@@ -626,6 +651,7 @@ const showAdminView = async () => {
     fillCompanyForm();
     fillHeroForm();
     updatePublishHint();
+    updateBackupButton();
   }
 };
 
@@ -871,12 +897,21 @@ const setupAdminEvents = () => {
   });
 
   document.getElementById("clear-cache-btn").addEventListener("click", async () => {
+    const confirmed = window.confirm(
+      "Isso apaga as alterações locais e recarrega o catálogo publicado no site. Deseja continuar?"
+    );
+    if (!confirmed) return;
+
     clearCatalogCache();
-    catalog = await loadCatalog();
+    catalog = await loadCatalog({ useCache: false });
     renderProductsTable();
     populateFeaturedProductSelect();
+    updatePublishHint();
+    updateBackupButton();
     showAlert("Cache local limpo. Dados recarregados do arquivo do site.");
   });
+
+  document.getElementById("restore-backup-btn").addEventListener("click", restoreCatalogFromBackup);
 
   document.getElementById("export-btn").addEventListener("click", () => {
     downloadCatalog(catalog);
