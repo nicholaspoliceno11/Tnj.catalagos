@@ -407,7 +407,7 @@ const init = async () => {
   try {
     const catalog = await loadCatalog();
     company = catalog.company;
-    products = catalog.products;
+    products = catalog.products.filter((product) => product.active !== false);
     hero = catalog.hero || {};
     defaultCategory = catalog.defaultCategory || "Brinquedos Sensoriais";
     state.category = defaultCategory;

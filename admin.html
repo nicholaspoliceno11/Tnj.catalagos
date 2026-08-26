@@ -73,7 +73,9 @@
       <section id="products-panel" class="admin-panel">
         <div class="admin-panel__toolbar">
           <button type="button" class="btn btn--primary" id="new-product-btn">+ Novo produto</button>
+          <button type="button" class="btn btn--outline" id="sync-gestao-btn">↻ Importar da gestão</button>
         </div>
+        <p class="admin-panel__hint" id="gestao-sync-hint"></p>
         <div class="admin-table-wrap">
           <table class="admin-table">
             <thead>
@@ -82,6 +84,7 @@
                 <th>Código</th>
                 <th>Categoria</th>
                 <th>Preço</th>
+                <th>Status</th>
                 <th>Ações</th>
               </tr>
             </thead>
@@ -134,6 +137,27 @@
           </div>
         </form>
 
+        <form id="gestao-form" class="admin-form admin-form--grid admin-form--section">
+          <h2>Integração Gestão TNJ 3D</h2>
+          <p class="admin-form__hint">
+            Conecte ao mesmo Apps Script usado em
+            <a href="https://nicholaspoliceno11.github.io/Empresa_TNJ.3D/" target="_blank" rel="noopener noreferrer">Empresa_TNJ.3D</a>.
+            Novos projetos entram no catálogo como <strong>inativos</strong> para você editar e publicar.
+          </p>
+          <label class="admin-form__full">
+            URL da API (Apps Script /exec)
+            <input type="url" id="gestao-api-url" placeholder="https://script.google.com/macros/s/.../exec" />
+          </label>
+          <label class="admin-form__checkbox admin-form__full">
+            <input type="checkbox" id="gestao-auto-sync" />
+            Importar automaticamente ao abrir o admin
+          </label>
+          <div class="admin-form__full admin-form__actions">
+            <button type="button" class="btn btn--outline" id="save-gestao-btn">Salvar integração</button>
+            <button type="button" class="btn btn--ghost" id="test-gestao-btn">Testar conexão</button>
+          </div>
+        </form>
+
         <form id="github-form" class="admin-form admin-form--grid admin-form--section">
           <h2>Publicação no GitHub (opcional)</h2>
           <p class="admin-form__hint">
@@ -177,6 +201,10 @@
         <label class="admin-form__checkbox">
           <input type="checkbox" id="product-featured" />
           Destaque no catálogo
+        </label>
+        <label class="admin-form__checkbox">
+          <input type="checkbox" id="product-active" checked />
+          Ativo no catálogo público
         </label>
 
         <div class="admin-form__full admin-tag-group">

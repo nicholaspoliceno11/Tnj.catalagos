@@ -6,8 +6,15 @@ import {
   publishToGitHub,
   compressImageFile,
 } from "./catalog-store.js";
+import {
+  DEFAULT_GESTAO_API_URL,
+  fetchGestaoProjetos,
+  syncProjetosToCatalog,
+} from "./gestao-sync.js";
 
 const TOKEN_KEY = "tnj3d_github_token";
+const GESTAO_API_KEY = "tnj3d_gestao_api_url";
+const GESTAO_AUTO_SYNC_KEY = "tnj3d_gestao_auto_sync";
 let catalog = null;
 let editingProductId = null;
 let appReady = false;
@@ -51,27 +58,58 @@ const clearLoginError = () => {
   errorEl.hidden = true;
 };
 
+const isProductActive = (product) => product.active !== false;
+
 const renderProductsTable = () => {
   const tbody = document.getElementById("products-table");
   if (!tbody || !catalog) return;
 
-  tbody.innerHTML = catalog.products
+  const sorted = [...catalog.products].sort((a, b) => {
+    const aInactive = !isProductActive(a);
+    const bInactive = !isProductActive(b);
+    if (aInactive !== bInactive) return aInactive ? -1 : 1;
+    return a.name.localeCompare(b.name, "pt-BR");
+  });
+
+  tbody.innerHTML = sorted
     .map(
       (product) => `
-      <tr>
-        <td><strong>${product.name}</strong></td>
+      <tr class="${isProductActive(product) ? "" : "admin-table__row--inactive"}">
+        <td><strong>${product.name}</strong>${product.projetoId ? `<br><span class="admin-table__meta">Gestão: ${product.projetoId}</span>` : ""}</td>
         <td>${product.code}</td>
         <td>${product.category}</td>
         <td>${formatPrice(product.price)}</td>
         <td>
+          <span class="admin-status admin-status--${isProductActive(product) ? "active" : "inactive"}">
+            ${isProductActive(product) ? "Ativo" : "Inativo"}
+          </span>
+        </td>
+        <td>
           <div class="admin-table__actions">
             <button class="btn btn--ghost btn--sm js-edit" data-id="${product.id}">Editar</button>
+            ${
+              isProductActive(product)
+                ? `<button class="btn btn--outline btn--sm js-toggle-active" data-id="${product.id}">Desativar</button>`
+                : `<button class="btn btn--primary btn--sm js-toggle-active" data-id="${product.id}">Ativar</button>`
+            }
             <button class="btn btn--outline btn--sm js-delete" data-id="${product.id}">Excluir</button>
           </div>
         </td>
       </tr>`
     )
     .join("");
+
+  updateGestaoSyncHint();
+};
+
+const updateGestaoSyncHint = () => {
+  const hint = document.getElementById("gestao-sync-hint");
+  if (!hint || !catalog) return;
+  const inactive = catalog.products.filter((product) => !isProductActive(product)).length;
+  hint.textContent =
+    inactive > 0
+      ? `${inactive} produto(s) inativo(s) aguardando revisão antes de publicar no site.`
+      : "Todos os produtos estão ativos no catálogo público.";
 };
 
 const fillCompanyForm = () => {
@@ -90,6 +128,7 @@ const populateFeaturedProductSelect = () => {
   if (!select || !catalog) return;
 
   select.innerHTML = catalog.products
+    .filter(isProductActive)
     .map(
       (product) =>
         `<option value="${product.id}">${product.name} (${product.code})</option>`
@@ -189,6 +228,7 @@ const openProductModal = (product = null) => {
   document.getElementById("product-image").value =
     product?.image && !product.image.startsWith("data:image/") ? product.image : "";
   document.getElementById("product-featured").checked = Boolean(product?.featured);
+  document.getElementById("product-active").checked = product ? isProductActive(product) : true;
   setSelectedAudienceTags(product?.audienceTags || []);
   document.getElementById("product-offer-type").value = product?.offerType || "";
   document.getElementById("product-offer-label").value = product?.offerLabel || "";
@@ -213,8 +253,13 @@ const saveProductFromForm = (event) => {
   const offerType = document.getElementById("product-offer-type").value;
   const offerLabel = document.getElementById("product-offer-label").value.trim();
 
+  const existing = editingProductId
+    ? catalog.products.find((item) => item.id === editingProductId)
+    : null;
+
   const productData = {
     id: editingProductId || `item-${Date.now()}`,
+    projetoId: existing?.projetoId,
     name: document.getElementById("product-name").value.trim(),
     code: document.getElementById("product-code").value.trim(),
     subtitle: document.getElementById("product-subtitle").value.trim() || undefined,
@@ -229,6 +274,7 @@ const saveProductFromForm = (event) => {
       document.getElementById("product-image").value.trim() ||
       null,
     featured: document.getElementById("product-featured").checked,
+    active: document.getElementById("product-active").checked,
     description: document.getElementById("product-description").value.trim(),
     benefit: document.getElementById("product-benefit").value.trim() || undefined,
   };
@@ -248,7 +294,64 @@ const saveProductFromForm = (event) => {
   showAlert("Produto salvo localmente. Clique em Publicar catálogo para atualizar o site.");
 };
 
-const showAdminView = () => {
+const getGestaoApiUrl = () =>
+  localStorage.getItem(GESTAO_API_KEY) || DEFAULT_GESTAO_API_URL;
+
+const fillGestaoForm = () => {
+  const apiInput = document.getElementById("gestao-api-url");
+  const autoSync = document.getElementById("gestao-auto-sync");
+  if (apiInput) apiInput.value = getGestaoApiUrl();
+  if (autoSync) autoSync.checked = localStorage.getItem(GESTAO_AUTO_SYNC_KEY) === "1";
+};
+
+const runGestaoSync = async ({ silent = false } = {}) => {
+  const apiUrl = getGestaoApiUrl().trim();
+  if (!apiUrl) {
+    if (!silent) showAlert("Configure a URL da API da gestão em Configurações.", "error");
+    return null;
+  }
+
+  const button = document.getElementById("sync-gestao-btn");
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Importando...";
+  }
+
+  try {
+    const projetos = await fetchGestaoProjetos(apiUrl);
+    const result = syncProjetosToCatalog(catalog, projetos);
+    saveCatalog(catalog);
+    renderProductsTable();
+    populateFeaturedProductSelect();
+
+    if (!silent) {
+      if (result.added || result.updated) {
+        showAlert(
+          `Importação concluída: ${result.added} novo(s) inativo(s), ${result.updated} atualizado(s).`
+        );
+      } else {
+        showAlert("Nenhum projeto novo para importar.");
+      }
+    }
+
+    return result;
+  } catch (error) {
+    if (!silent) showAlert(error.message, "error");
+    return null;
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "↻ Importar da gestão";
+    }
+  }
+};
+
+const maybeAutoSyncGestao = async () => {
+  if (localStorage.getItem(GESTAO_AUTO_SYNC_KEY) !== "1") return;
+  await runGestaoSync({ silent: true });
+};
+
+const showAdminView = async () => {
   const loginView = document.getElementById("login-view");
   const adminView = document.getElementById("admin-view");
 
@@ -258,6 +361,8 @@ const showAdminView = () => {
   adminView.style.display = "";
 
   if (catalog) {
+    fillGestaoForm();
+    await maybeAutoSyncGestao();
     renderProductsTable();
     fillCompanyForm();
     fillHeroForm();
@@ -294,7 +399,7 @@ const setupLoginForm = () => {
         document.getElementById("login-email").value,
         document.getElementById("login-password").value
       );
-      showAdminView();
+      await showAdminView();
     } catch (error) {
       showLoginError(error.message || "Não foi possível entrar.");
     } finally {
@@ -325,9 +430,9 @@ const setupAdminEvents = () => {
         settings: "Configurações",
       };
       const subtitles = {
-        products: "Edite preços, descrições e adicione novos itens.",
+        products: "Edite preços, importe da gestão e ative itens para publicar.",
         hero: "Altere textos, foto em destaque e produto do card.",
-        settings: "Dados da empresa e publicação no GitHub.",
+        settings: "Dados da empresa, gestão TNJ 3D e publicação no GitHub.",
       };
 
       document.getElementById("panel-title").textContent = titles[panel] || "Admin";
@@ -336,6 +441,7 @@ const setupAdminEvents = () => {
   });
 
   document.getElementById("new-product-btn").addEventListener("click", () => openProductModal());
+  document.getElementById("sync-gestao-btn").addEventListener("click", () => runGestaoSync());
   document.getElementById("product-form").addEventListener("submit", saveProductFromForm);
   document.getElementById("product-offer-type").addEventListener("change", updateOfferLabelVisibility);
   document.getElementById("product-image-file").addEventListener("change", async (event) => {
@@ -365,10 +471,24 @@ const setupAdminEvents = () => {
   document.getElementById("products-table").addEventListener("click", (event) => {
     const editBtn = event.target.closest(".js-edit");
     const deleteBtn = event.target.closest(".js-delete");
+    const toggleBtn = event.target.closest(".js-toggle-active");
 
     if (editBtn) {
       const product = catalog.products.find((item) => item.id === editBtn.dataset.id);
       openProductModal(product);
+    }
+
+    if (toggleBtn) {
+      const id = toggleBtn.dataset.id;
+      catalog.products = catalog.products.map((item) =>
+        item.id === id ? { ...item, active: !isProductActive(item) } : item
+      );
+      saveCatalog(catalog);
+      renderProductsTable();
+      populateFeaturedProductSelect();
+      showAlert(isProductActive(catalog.products.find((item) => item.id === id))
+        ? "Produto ativado no catálogo."
+        : "Produto desativado. Não aparece no site público.");
     }
 
     if (deleteBtn) {
@@ -444,6 +564,30 @@ const setupAdminEvents = () => {
     showAlert("Token salvo nesta sessão do navegador.");
   });
 
+  document.getElementById("save-gestao-btn").addEventListener("click", () => {
+    const apiUrl = document.getElementById("gestao-api-url").value.trim();
+    if (!apiUrl) {
+      showAlert("Informe a URL da API da gestão.", "error");
+      return;
+    }
+    localStorage.setItem(GESTAO_API_KEY, apiUrl);
+    localStorage.setItem(
+      GESTAO_AUTO_SYNC_KEY,
+      document.getElementById("gestao-auto-sync").checked ? "1" : "0"
+    );
+    showAlert("Integração com a gestão salva neste navegador.");
+  });
+
+  document.getElementById("test-gestao-btn").addEventListener("click", async () => {
+    const apiUrl = document.getElementById("gestao-api-url").value.trim() || getGestaoApiUrl();
+    try {
+      const projetos = await fetchGestaoProjetos(apiUrl);
+      showAlert(`Conexão OK. ${projetos.length} projeto(s) encontrado(s) na gestão.`);
+    } catch (error) {
+      showAlert(error.message, "error");
+    }
+  });
+
   document.getElementById("export-btn").addEventListener("click", () => {
     downloadCatalog(catalog);
     showAlert("Arquivo catalog.json baixado.");
@@ -487,7 +631,7 @@ const init = async () => {
     setupAdminEvents();
 
     if (isAuthenticated()) {
-      showAdminView();
+      await showAdminView();
     } else {
       showLoginView();
     }
