@@ -342,6 +342,70 @@
   gap: 0.35rem;
 }
 
+.admin-clicks {
+  display: inline-flex;
+  min-width: 2rem;
+  justify-content: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(92, 255, 138, 0.12);
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.admin-insights {
+  margin: 1rem 0 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: rgba(24, 28, 39, 0.55);
+}
+
+.admin-insights h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.admin-insights__hint {
+  margin: 0 0 0.85rem;
+  color: var(--color-muted);
+  font-size: 0.88rem;
+}
+
+.admin-insights__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.admin-insights__list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-insights__rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: rgba(92, 255, 138, 0.15);
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.admin-insights__meta {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
 .admin-form {
   display: grid;
   gap: 0.85rem;

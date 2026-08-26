@@ -55,6 +55,13 @@ const getCatalogUrl = () => {
 export { getCatalogUrl };
 
 import { ASSET_VERSION } from "./version.js";
+import {
+  buildClicksPayload,
+  fetchServerClicks,
+  getMergedClickCounts,
+  loadLocalClicks,
+  mergeAnalyticsIntoCatalog,
+} from "./analytics.js";
 
 export const fetchServerCatalog = async () => {
   const response = await fetch(`${getCatalogUrl()}?t=${Date.now()}`);
@@ -378,10 +385,9 @@ const stripEmbeddedImages = (catalog) => ({
   })),
 });
 
-const uploadCatalogJson = async (catalog, token) => {
-  const path = "data/catalog.json";
+const uploadJsonFile = async (path, payload, token, message) => {
   const apiBase = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
-  const content = encodeBase64(JSON.stringify(catalog, null, 2));
+  const content = encodeBase64(JSON.stringify(payload, null, 2));
 
   let sha;
   const current = await fetch(apiBase, { headers: githubHeaders(token) });
@@ -391,7 +397,7 @@ const uploadCatalogJson = async (catalog, token) => {
     sha = data.sha;
   } else if (current.status !== 404) {
     const detail = await parseGitHubError(current);
-    throw new Error(`Falha ao acessar o catálogo no GitHub. ${detail}`);
+    throw new Error(`Falha ao acessar ${path} no GitHub. ${detail}`);
   }
 
   const response = await fetch(apiBase, {
@@ -401,7 +407,7 @@ const uploadCatalogJson = async (catalog, token) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      message: "chore: atualizar catálogo via painel admin TNJ 3D",
+      message,
       content,
       branch: GITHUB_BRANCH,
       ...(sha ? { sha } : {}),
@@ -410,10 +416,38 @@ const uploadCatalogJson = async (catalog, token) => {
 
   if (!response.ok) {
     const detail = await parseGitHubError(response);
-    throw new Error(`Não foi possível publicar no GitHub. ${formatGitHubTokenError(response.status, detail)}`);
+    throw new Error(`Não foi possível publicar ${path}. ${formatGitHubTokenError(response.status, detail)}`);
   }
 
   return response.json();
+};
+
+const uploadCatalogJson = async (catalog, token) =>
+  uploadJsonFile(
+    "data/catalog.json",
+    catalog,
+    token,
+    "chore: atualizar catálogo via painel admin TNJ 3D"
+  );
+
+const uploadClicksJson = async (clicksMap, token) =>
+  uploadJsonFile(
+    "data/clicks.json",
+    buildClicksPayload(clicksMap),
+    token,
+    "chore: atualizar cliques do catálogo TNJ 3D"
+  );
+
+export const mergeCatalogAnalytics = async (catalog) => {
+  const serverClicks = await fetchServerClicks();
+  const localClicks = loadLocalClicks();
+  const mergedClicks = getMergedClickCounts(
+    catalog?.analytics?.clicks,
+    serverClicks,
+    localClicks
+  );
+
+  return mergeAnalyticsIntoCatalog(catalog, mergedClicks);
 };
 
 const validateCatalogPayload = (catalog) => {
@@ -479,9 +513,16 @@ export const publishToGitHub = async (catalog, token, { includeInactiveImages = 
     stripEmbeddedImages(catalog),
     await fetchServerCatalog()
   );
+  catalogToPublish = await mergeCatalogAnalytics(catalogToPublish);
   validateCatalogPayload(catalogToPublish);
 
   await uploadCatalogJson(catalogToPublish, trimmedToken);
+
+  try {
+    await uploadClicksJson(catalogToPublish.analytics?.clicks || {}, trimmedToken);
+  } catch (error) {
+    console.warn("Não foi possível publicar cliques:", error);
+  }
 
   let imageErrors = [];
   let savedCatalog = catalog;

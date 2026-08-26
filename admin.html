@@ -93,6 +93,7 @@
           <p class="admin-product-search__count" id="product-search-count"></p>
         </div>
         <p class="admin-panel__hint" id="gestao-sync-hint"></p>
+        <section class="admin-insights" id="trending-insights" hidden></section>
         <div class="admin-table-wrap">
           <table class="admin-table">
             <thead>
@@ -101,6 +102,7 @@
                 <th>Código</th>
                 <th>Categoria</th>
                 <th>Preço</th>
+                <th>Cliques</th>
                 <th>Status</th>
                 <th>Ações</th>
               </tr>
@@ -132,6 +134,10 @@
 
           <label>Rótulo do card<input type="text" id="hero-featured-label" placeholder="Destaque" /></label>
           <label>Produto em destaque<select id="hero-featured-product"></select></label>
+          <label class="admin-form__checkbox admin-form__full">
+            <input type="checkbox" id="hero-use-product-image" checked />
+            Usar foto do produto em destaque no topo (desmarque para usar a foto personalizada acima)
+          </label>
 
           <div class="admin-form__full">
             <button type="submit" class="btn btn--primary">Salvar página inicial</button>
@@ -335,6 +341,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="js/admin.js?v=20260826r"></script>
+  <script type="module" src="js/admin.js?v=20260826s"></script>
 </body>
 </html>

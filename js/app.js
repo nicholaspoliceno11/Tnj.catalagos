@@ -10,11 +10,15 @@ import {
   buildListingQuoteMessage,
 } from "./listing.js";
 import { getCatalogCategories } from "./categories.js";
+import { trackProductClick } from "./analytics.js";
+import { DEFAULT_GESTAO_API_URL } from "./gestao-sync.js";
 
 let company = {};
 let products = [];
 let hero = {};
 let defaultCategory = "Brinquedos Sensoriais";
+let analyticsEndpoint = "";
+let featuredProduct = null;
 
 const state = {
   search: "",
@@ -212,9 +216,11 @@ const renderProducts = () => {
   grid.innerHTML = filtered.map(renderProductCard).join("");
 };
 
-const openModal = (productId) => {
+const openModal = (productId, source = "modal") => {
   const product = products.find((item) => item.id === productId);
   if (!product) return;
+
+  trackProductClick(product.id, source, { analyticsEndpoint });
 
   const modal = document.getElementById("product-modal");
   const body = document.getElementById("modal-body");
@@ -305,10 +311,11 @@ const setupCategoryFilters = () => {
 
 const setupHero = () => {
   const stats = document.getElementById("hero-stats");
-  const featuredProduct =
+  featuredProduct =
     products.find((product) => product.id === hero.featuredProductId) ||
     products.find((product) => product.featured) ||
-    products[0];
+    products[0] ||
+    null;
 
   document.getElementById("hero-eyebrow").textContent = hero.eyebrow || "";
   document.getElementById("hero-title").textContent = hero.title || "";
@@ -317,14 +324,36 @@ const setupHero = () => {
   document.getElementById("hero-cta-secondary").textContent = hero.ctaSecondary || "Solicitar orçamento";
 
   const heroImage = document.getElementById("hero-image");
-  if (hero.image) {
-    heroImage.src = hero.image;
-    heroImage.alt = hero.title || "TNJ 3D";
-  }
+  const useProductImage = hero.useProductImage !== false;
+  const imageSrc =
+    useProductImage && featuredProduct?.image
+      ? featuredProduct.image
+      : hero.image || "assets/logo.png";
 
-  document.getElementById("featured-label").textContent = hero.featuredLabel || "Destaque";
-  document.getElementById("featured-name").textContent = featuredProduct?.name || "—";
-  document.getElementById("featured-price").textContent = formatPrice(featuredProduct?.price);
+  heroImage.src = imageSrc;
+  heroImage.alt = featuredProduct?.name || hero.title || "TNJ 3D";
+  heroImage.onerror = () => {
+    heroImage.src = hero.image || "assets/logo.png";
+  };
+
+  const featuredCard = document.getElementById("featured-card");
+  const featuredLabel = document.getElementById("featured-label");
+  const featuredName = document.getElementById("featured-name");
+  const featuredPrice = document.getElementById("featured-price");
+
+  if (featuredProduct) {
+    featuredCard.hidden = false;
+    featuredLabel.textContent = hero.featuredLabel || "Destaque";
+    featuredName.textContent = featuredProduct.name;
+    featuredPrice.textContent = formatPrice(featuredProduct.price);
+    featuredCard.dataset.productId = featuredProduct.id;
+  } else {
+    featuredCard.hidden = true;
+    featuredLabel.textContent = hero.featuredLabel || "Destaque";
+    featuredName.textContent = "—";
+    featuredPrice.textContent = "—";
+    featuredCard.removeAttribute("data-product-id");
+  }
 
   stats.innerHTML = `
     <div><dt>Produtos</dt><dd>${products.length}</dd></div>
@@ -423,7 +452,12 @@ const setupEvents = () => {
   document.getElementById("product-grid").addEventListener("click", (event) => {
     const button = event.target.closest(".js-details");
     if (!button) return;
-    openModal(button.dataset.id);
+    openModal(button.dataset.id, "card");
+  });
+
+  document.getElementById("featured-card")?.addEventListener("click", () => {
+    if (!featuredProduct) return;
+    openModal(featuredProduct.id, "hero");
   });
 
   document.getElementById("modal-close").addEventListener("click", () => {
@@ -438,6 +472,8 @@ const init = async () => {
     products = catalog.products.filter(isProductPublished);
     hero = catalog.hero || {};
     defaultCategory = catalog.defaultCategory || "Brinquedos Sensoriais";
+    analyticsEndpoint =
+      catalog.company?.analyticsEndpoint || catalog.analyticsEndpoint || DEFAULT_GESTAO_API_URL;
     state.category = defaultCategory;
   } catch (error) {
     document.getElementById("results-count").textContent = "Erro ao carregar catálogo.";

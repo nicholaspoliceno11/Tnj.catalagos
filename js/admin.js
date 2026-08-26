@@ -1,4 +1,4 @@
-import { login, logout, isAuthenticated } from "./auth.js?v=20260826r";
+import { login, logout, isAuthenticated } from "./auth.js?v=20260826s";
 import {
   loadCatalog,
   saveCatalog,
@@ -15,20 +15,21 @@ import {
   normalizeGitHubToken,
   mergeCatalogPrices,
   fetchServerCatalog,
-} from "./catalog-store.js?v=20260826r";
+  mergeCatalogAnalytics,
+} from "./catalog-store.js?v=20260826s";
 import {
   DEFAULT_GESTAO_API_URL,
   fetchGestaoProjetos,
   syncProjetosToCatalog,
-} from "./gestao-sync.js?v=20260826r";
+} from "./gestao-sync.js?v=20260826s";
 import {
   formatProductPrice,
-} from "./listing.js?v=20260826r";
+} from "./listing.js?v=20260826s";
 import {
   fillCategoryDatalist,
   normalizeCatalogCategories,
   resolveCategoryName,
-} from "./categories.js?v=20260826r";
+} from "./categories.js?v=20260826s";
 import {
   PRESET_AUDIENCE_TAGS,
   normalizeAudienceTags,
@@ -37,7 +38,14 @@ import {
   isPresetAudienceTag,
   escapeHtml,
   getAudienceTagStyle,
-} from "./tags.js?v=20260826r";
+} from "./tags.js?v=20260826s";
+import {
+  fetchServerClicks,
+  getMergedClickCounts,
+  getTopProductsByClicks,
+  loadLocalClicks,
+  normalizeClickStats,
+} from "./analytics.js?v=20260826s";
 
 const TOKEN_KEY = "tnj3d_github_token";
 const PUBLIC_SITE_URL = "https://nicholaspoliceno11.github.io/Tnj.catalagos/";
@@ -78,6 +86,7 @@ let heroUploadedImageData = null;
 let productFilter = "all";
 let productSearchQuery = "";
 let customAudienceTags = [];
+let clickCounts = {};
 
 const formatPrice = (value) => {
   if (value === null || value === undefined) return "Sob consulta";
@@ -117,6 +126,48 @@ const clearLoginError = () => {
 };
 
 const isProductActive = (product) => product.active !== false;
+
+const getProductClickCount = (productId) => normalizeClickStats(clickCounts[productId]).total;
+
+const loadClickCounts = async () => {
+  const serverClicks = await fetchServerClicks();
+  const localClicks = loadLocalClicks();
+  clickCounts = getMergedClickCounts(catalog?.analytics?.clicks, serverClicks, localClicks);
+};
+
+const renderTrendingSection = () => {
+  const container = document.getElementById("trending-insights");
+  if (!container || !catalog) return;
+
+  const top = getTopProductsByClicks(catalog.products, clickCounts, 5);
+  if (!top.length) {
+    container.hidden = true;
+    container.innerHTML = "";
+    return;
+  }
+
+  container.hidden = false;
+  container.innerHTML = `
+    <h2>Em alta</h2>
+    <p class="admin-insights__hint">
+      Produtos com mais cliques no catálogo. Os dados são salvos em <strong>data/clicks.json</strong> ao publicar.
+    </p>
+    <ol class="admin-insights__list">
+      ${top
+        .map(
+          (entry, index) => `
+        <li>
+          <span class="admin-insights__rank">${index + 1}</span>
+          <div>
+            <strong>${escapeHtml(entry.product.name)}</strong>
+            <span class="admin-insights__meta">${escapeHtml(entry.product.code)} · ${entry.clicks} clique${entry.clicks === 1 ? "" : "s"}</span>
+          </div>
+        </li>`
+        )
+        .join("")}
+    </ol>
+  `;
+};
 
 const matchesProductSearch = (product, query) => {
   const term = query.trim().toLowerCase();
@@ -185,7 +236,7 @@ const renderProductsTable = () => {
     const hasSearch = Boolean(productSearchQuery.trim());
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" class="admin-table__empty">
+        <td colspan="7" class="admin-table__empty">
           ${
             hasSearch
               ? `Nenhum projeto encontrado para <strong>${escapeHtml(productSearchQuery.trim())}</strong>.`
@@ -209,6 +260,9 @@ const renderProductsTable = () => {
         <td>${product.category}</td>
         <td>${formatProductPrice(product, formatPrice)}</td>
         <td>
+          <span class="admin-clicks" title="Cliques no catálogo público">${getProductClickCount(product.id)}</span>
+        </td>
+        <td>
           <span class="admin-status admin-status--${isProductActive(product) ? "active" : "inactive"}">
             ${isProductActive(product) ? "Ativo" : "Inativo"}
           </span>
@@ -231,6 +285,7 @@ const renderProductsTable = () => {
   updateGestaoSyncHint();
   updateProductSearchCount(sorted.length);
   updatePublishHint();
+  renderTrendingSection();
 };
 
 const updatePublishHint = async () => {
@@ -391,6 +446,7 @@ const fillHeroForm = () => {
   document.getElementById("hero-featured-label").value = hero.featuredLabel || "Destaque";
   document.getElementById("hero-featured-product").value =
     hero.featuredProductId || catalog.products[0]?.id || "";
+  document.getElementById("hero-use-product-image").checked = hero.useProductImage !== false;
 
   resetHeroImagePreview();
   if (hero.image) {
@@ -739,6 +795,7 @@ const showAdminView = async () => {
   if (catalog) {
     fillGestaoForm();
     await maybeAutoSyncGestao();
+    await loadClickCounts();
     renderProductsTable();
     fillCompanyForm();
     fillHeroForm();
@@ -936,6 +993,7 @@ const setupAdminEvents = () => {
         "assets/logo.png",
       featuredProductId: document.getElementById("hero-featured-product").value,
       featuredLabel: document.getElementById("hero-featured-label").value.trim() || "Destaque",
+      useProductImage: document.getElementById("hero-use-product-image").checked,
     };
     saveCatalog(catalog);
     showAlert("Página inicial salva. Clique em Publicar catálogo para atualizar o site.");
@@ -1016,6 +1074,7 @@ const setupAdminEvents = () => {
 
     clearCatalogCache();
     catalog = await loadCatalog({ useCache: false });
+    await loadClickCounts();
     renderProductsTable();
     populateFeaturedProductSelect();
     updatePublishHint();
@@ -1040,6 +1099,10 @@ const setupAdminEvents = () => {
         const { imageErrors, activeCount, productCount, imagesUploaded } = await publishToGitHub(catalog, token, {
           includeInactiveImages,
         });
+        catalog = await mergeCatalogAnalytics(catalog);
+        saveCatalog(catalog);
+        await loadClickCounts();
+        renderProductsTable();
 
         if (imageErrors?.length) {
           showAlert(
