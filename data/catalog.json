@@ -412,12 +412,12 @@
       "projetoId": "PRJ-20260726-052",
       "name": "Boneco Ciclope",
       "code": "PRJ-20260726-052",
+      "subtitle": "Filamento PLA Preto / novo + Filamento PLA Azul + Filamento PLA Amarelo + Filamento PLA Marrom + Filamento PLA Vermelho + Filamento PLA Bege",
       "category": "Brinquedos Sensoriais",
       "price": 70.95,
-      "active": false,
-      "description": "Projeto PRJ-20260726-052 importado da gestão TNJ 3D. Edite foto, tags e descrição, depois ative para publicar.",
-      "subtitle": "Filamento PLA Preto / novo + Filamento PLA Azul + Filamento PLA Amarelo + Filamento PLA Marrom + Filamento PLA Vermelho + Filamento PLA Bege",
-      "featured": false
+      "featured": false,
+      "active": true,
+      "description": "Projeto PRJ-20260726-052 importado da gestão TNJ 3D. Edite foto, tags e descrição, depois ative para publicar."
     },
     {
       "id": "prj-20260725-051",
