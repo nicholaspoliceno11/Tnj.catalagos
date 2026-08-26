@@ -118,12 +118,38 @@ const renderOfferBadge = (product) => {
   return `<span class="product-card__offer product-card__offer--${product.offerType}">${label}</span>`;
 };
 
+const renderModalPriceBlock = (product) => {
+  const modifier = product.offerType ? `modal__price-block--${product.offerType}` : "";
+  const offerLabel =
+    product.offerLabel ||
+    (product.offerType === "kit" ? "Kit especial" : product.offerType === "promocao" ? "Em promoção" : "");
+
+  const offerBanner = product.offerType
+    ? `<span class="modal__offer-banner modal__offer-banner--${product.offerType}">${offerLabel}</span>`
+    : "";
+
+  return `
+    <div class="modal__price-block ${modifier}">
+      ${offerBanner}
+      <span class="modal__price-label">Valor</span>
+      <p class="modal__price">${formatPrice(product.price)}</p>
+    </div>
+  `;
+};
+
 const renderProductCard = (product) => {
   const imageSrc = product.image || productImageFallback(product.name);
   const quoteMessage = buildQuoteMessage(product);
+  const cardModifier = product.offerType === "promocao" ? " product-card--promocao" : "";
+  const priceClass =
+    product.offerType === "promocao"
+      ? "product-card__price product-card__price--promo"
+      : product.offerType === "kit"
+        ? "product-card__price product-card__price--kit"
+        : "product-card__price";
 
   return `
-    <article class="product-card" data-id="${product.id}">
+    <article class="product-card${cardModifier}" data-id="${product.id}">
       <div class="product-card__media">
         ${product.badge ? `<span class="product-card__badge">${product.badge}</span>` : ""}
         ${renderOfferBadge(product)}
@@ -137,7 +163,7 @@ const renderProductCard = (product) => {
         ${renderAudienceTags(product.audienceTags)}
         <div class="product-card__footer">
           <div>
-            <span class="product-card__price">${formatPrice(product.price)}</span>
+            <span class="${priceClass}">${formatPrice(product.price)}</span>
             <span class="product-card__code">${product.code}</span>
           </div>
           <div class="product-card__actions">
@@ -184,6 +210,8 @@ const openModal = (productId) => {
   const imageSrc = product.image || productImageFallback(product.name);
   const quoteMessage = buildQuoteMessage(product);
 
+  const modalModifier = product.offerType === "promocao" ? " modal__body--promocao" : "";
+
   body.innerHTML = `
     <div class="modal__image">
       <img src="${imageSrc}" alt="${product.name}" onerror="this.src='${productImageFallback(product.name)}'" />
@@ -225,11 +253,12 @@ const openModal = (productId) => {
             </div>`
           : ""
       }
-      <p class="product-card__price">${formatPrice(product.price)}</p>
+      ${renderModalPriceBlock(product)}
       <a class="btn btn--whatsapp" href="${buildWhatsAppLink(quoteMessage)}" target="_blank" rel="noopener noreferrer">Solicitar orçamento</a>
     </div>
   `;
 
+  body.className = `modal__body${modalModifier}`;
   modal.showModal();
 };
 
